@@ -2,8 +2,6 @@
 Tests for utils module.
 """
 
-import pytest
-
 from lpdp import utils
 
 
