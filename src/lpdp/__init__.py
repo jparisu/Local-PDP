@@ -9,9 +9,9 @@ __author__ = "jparisu"
 
 import logging
 
-logging.getLogger(__name__).addHandler(logging.NullHandler())
-
 from . import submodule_a, utils
+
+logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 __all__ = [
     "submodule_a",
