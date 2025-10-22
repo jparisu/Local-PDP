@@ -2,6 +2,8 @@
 Module A - Feature attribution core implementation.
 """
 
+import logging
+logger = logging.getLogger(__name__)
 
 def function_a(x: int) -> int:
     """
@@ -13,6 +15,7 @@ def function_a(x: int) -> int:
     Returns:
         Processed result
     """
+    logger.debug("function_a called with x=%d", x)
     return x * 2
 
 

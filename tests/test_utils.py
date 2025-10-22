@@ -2,7 +2,7 @@
 Tests for utils module.
 """
 
-from lpdp import utils
+from lpdp.utils import utils
 
 
 def test_helper_function():

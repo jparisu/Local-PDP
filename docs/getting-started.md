@@ -53,6 +53,17 @@ processed = utils.process_data({"key": "value"})
 print(f"Processed: {processed}")  # Output: Processed: {'key': 'value'}
 ```
 
+
+### Logging
+`lpdp` emits logs via the standard `logging` library.
+
+Enable globally:
+```python
+import logging
+logging.basicConfig(level=logging.INFO)
+```
+
+
 ## Troubleshooting
 
 ### Import Errors
