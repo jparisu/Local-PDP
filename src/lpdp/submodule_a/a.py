@@ -6,6 +6,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 def function_a(x: int) -> int:
     """
     Example function in module A.
