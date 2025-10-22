@@ -31,6 +31,7 @@ dependencies = [
 lint = [
     "ruff>=0.14.0",
     "mypy>=1.0.0",
+    "codespell>=2.0.0",
 ]
 test = [
     "pytest>=7.0.0",

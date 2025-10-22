@@ -38,3 +38,6 @@ jobs:
     - name: Type check with mypy
       run: |
         mypy src/lpdp
+
+    - name: Spell check (codespell)
+      run: codespell --config spelling/.codespellrc .
