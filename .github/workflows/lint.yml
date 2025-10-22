@@ -40,4 +40,4 @@ jobs:
         mypy src/lpdp
 
     - name: Spell check (codespell)
-      run: codespell --config spelling/.codespellrc .
+      run: codespell spelling/.codespellrc .
