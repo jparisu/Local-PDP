@@ -7,6 +7,9 @@ repo_name: jparisu/Local-PDP
 repo_url: https://github.com/jparisu/Local-PDP
 edit_uri: edit/main/
 
+# Documentation source directory (moved mkdocs inside docs)
+docs_dir: "."
+
 # Theme
 theme:
   name: readthedocs
