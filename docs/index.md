@@ -40,12 +40,12 @@ pip install lpdp
 
 ## Contributing
 
-We welcome contributions! Please see our [Contributing Guide](../CONTRIBUTING.md) for details.
+We welcome contributions! Please check our [Contributing Guide](https://github.com/jparisu/Local-PDP/blob/main/CONTRIBUTING.md).
 
 ## License
 
-This project is licensed under the terms in the [LICENSE](../LICENSE) file.
+This project is licensed under the terms in the [LICENSE](https://github.com/jparisu/Local-PDP/blob/main/LICENSE) file.
 
 ## Citation
 
-If you use this library in your research, please cite it as described in [CITATION.cff](../CITATION.cff).
+If you use this library in your research, please cite it as described in [CITATION.cff](https://github.com/jparisu/Local-PDP/blob/main/CITATION.cff).
