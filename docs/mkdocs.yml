@@ -7,28 +7,9 @@ repo_name: jparisu/Local-PDP
 repo_url: https://github.com/jparisu/Local-PDP
 edit_uri: edit/main/docs/
 
+# Theme
 theme:
-  name: material
-  palette:
-    - scheme: default
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
-    - scheme: slate
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/brightness-4
-        name: Switch to light mode
-  features:
-    - navigation.tabs
-    - navigation.sections
-    - navigation.top
-    - search.suggest
-    - search.highlight
-    - content.code.copy
+  name: readthedocs
 
 plugins:
   - search
