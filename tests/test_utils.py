@@ -4,7 +4,7 @@ Tests for utils module.
 
 import pytest
 
-from yourlib import utils
+from lpdp import utils
 
 
 def test_helper_function():

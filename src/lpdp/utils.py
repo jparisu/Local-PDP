@@ -1,5 +1,5 @@
 """
-Utility functions for yourlib.
+Utility functions for lpdp.
 """
 
 

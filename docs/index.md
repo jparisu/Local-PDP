@@ -1,10 +1,10 @@
-# yourlib Documentation
+# Local-PDP Documentation
 
-Welcome to the yourlib documentation! This library provides tools for Feature Attribution Study and Machine Learning Explainability using Local-PDP (Local Partial Dependence Plot) analysis.
+Welcome to the `lpdp` documentation! This library provides tools for Machine Learning Explainability using Feature Attribution Model-Agnostic techniques as ICE, PDP and l-PDP (Local Partial Dependence Plot) analysis.
 
 ## Overview
 
-yourlib is a Python library designed to help data scientists and machine learning practitioners understand and explain their models through advanced feature attribution techniques.
+`lpdp` is a Python library designed to help data scientists and machine learning practitioners understand and explain their models through advanced feature attribution techniques.
 
 ## Features
 
@@ -15,9 +15,9 @@ yourlib is a Python library designed to help data scientists and machine learnin
 ## Quick Start
 
 ```python
-from yourlib.submodule_a.a import function_a, ClassA
-from yourlib.submodule_b.b import function_b, ClassB
-from yourlib import utils
+from lpdp.submodule_a.a import function_a, ClassA
+from lpdp.submodule_b.b import function_b, ClassB
+from lpdp import utils
 
 # Use function_a
 result = function_a(5)
@@ -31,13 +31,12 @@ print(obj.method_a())  # Output: 42
 ## Installation
 
 ```bash
-pip install yourlib
+pip install lpdp
 ```
 
 ## Documentation Structure
 
 - [Getting Started](getting-started.md) - Installation and basic usage
-- [API Reference](api.md) - Complete API documentation
 
 ## Contributing
 

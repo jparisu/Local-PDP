@@ -2,7 +2,7 @@
 Tests for submodule_b functionality.
 """
 
-from yourlib.submodule_b.b import ClassB, function_b
+from lpdp.submodule_b.b import ClassB, function_b
 
 
 def test_function_b():

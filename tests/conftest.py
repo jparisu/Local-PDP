@@ -1,5 +1,5 @@
 """
-Pytest configuration file for yourlib tests.
+Pytest configuration file for lpdp tests.
 """
 
 import sys

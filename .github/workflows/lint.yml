@@ -1,0 +1,35 @@
+name: Linter, Format and Type Checker
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Lint with ruff
+      run: |
+        ruff check src/ tests/
+
+    - name: Format check with ruff
+      run: |
+        ruff format --check src/ tests/
+
+    - name: Type check with mypy
+      run: |
+        mypy src/lpdp

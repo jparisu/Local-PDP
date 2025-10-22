@@ -1,29 +1,14 @@
 # Getting Started
 
-This guide will help you get started with yourlib.
-
-## Installation
-
-### From PyPI
-
-```bash
-pip install yourlib
-```
-
-### From Source
-
-```bash
-git clone https://github.com/jparisu/Local-PDP.git
-cd Local-PDP
-pip install -e .
-```
+This guide will help you get started with `lpdp`.
+First, make sure to install the library: [Installation](installation.md)
 
 ## Basic Usage
 
 ### Using Submodule A
 
 ```python
-from yourlib.submodule_a.a import function_a, ClassA
+from lpdp.submodule_a.a import function_a, ClassA
 
 # Use function_a
 result = function_a(10)
@@ -38,7 +23,7 @@ print(f"Value: {value}")  # Output: Value: 100
 ### Using Submodule B
 
 ```python
-from yourlib.submodule_b.b import function_b, ClassB
+from lpdp.submodule_b.b import function_b, ClassB
 
 # Use function_b
 result = function_b(5)
@@ -53,7 +38,7 @@ print(f"Data: {data}")  # Output: Data: [1, 2, 3]
 ### Using Utilities
 
 ```python
-from yourlib import utils
+from lpdp import utils
 
 # Use helper function
 result = utils.helper_function(5, 10)
@@ -68,22 +53,11 @@ processed = utils.process_data({"key": "value"})
 print(f"Processed: {processed}")  # Output: Processed: {'key': 'value'}
 ```
 
-## Next Steps
-
-- Read the [API Reference](api.md) for detailed documentation
-- Check out the [examples](https://github.com/jparisu/Local-PDP/tree/main/examples) (coming soon)
-- Contribute to the project by following the [Contributing Guide](../CONTRIBUTING.md)
-
-## Requirements
-
-- Python 3.8 or higher
-- Dependencies as listed in `pyproject.toml`
-
 ## Troubleshooting
 
 ### Import Errors
 
-If you encounter import errors, make sure yourlib is properly installed:
+If you encounter import errors, make sure lpdp is properly installed:
 
 ```bash
 pip install -e .

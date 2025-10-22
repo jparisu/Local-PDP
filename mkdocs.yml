@@ -1,5 +1,5 @@
-site_name: yourlib Documentation
-site_description: Feature Attribution Study Python library for Machine Learning Explainability
+site_name: lpdp Documentation
+site_description: Feature Attribution Model-Agnostic Python library for Machine Learning Explainability
 site_author: jparisu
 site_url: https://local-pdp.readthedocs.io/
 
@@ -54,6 +54,7 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Installation: installation.md
   - Getting Started: getting-started.md
   - API Reference: api.md
 

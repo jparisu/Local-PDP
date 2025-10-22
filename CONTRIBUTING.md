@@ -1,6 +1,6 @@
-# Contributing to yourlib
+# Contributing to lpdp
 
-Thank you for your interest in contributing to yourlib! This document provides guidelines and instructions for contributing to this project.
+Thank you for your interest in contributing to `lpdp`! This document provides guidelines and instructions for contributing to this project.
 
 ## Getting Started
 
@@ -54,7 +54,7 @@ ruff format src/ tests/
 ruff check src/ tests/
 
 # Type check
-mypy src/yourlib
+mypy src/lpdp
 
 # Run tests
 pytest tests/
@@ -72,7 +72,7 @@ All contributions should include tests:
    ```
 4. Check test coverage:
    ```bash
-   pytest tests/ --cov=yourlib --cov-report=term
+   pytest tests/ --cov=lpdp --cov-report=term
    ```
 
 ### Documentation

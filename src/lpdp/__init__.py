@@ -1,5 +1,5 @@
 """
-yourlib - Feature Attribution Study Python library for Machine Learning Explainability.
+lpdp - Feature Attribution Study Python library for Machine Learning Explainability.
 
 A Python library for Local-PDP (Local Partial Dependence Plot) analysis.
 """
