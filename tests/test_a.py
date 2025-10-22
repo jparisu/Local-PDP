@@ -12,12 +12,6 @@ def test_function_a():
     assert function_a(-3) == -6
 
 
-def test_function_a_with_float():
-    """Test function_a with float values."""
-    assert function_a(2.5) == 5.0
-    assert function_a(0.5) == 1.0
-
-
 def test_class_a_initialization(sample_value):
     """Test ClassA initialization."""
     obj = ClassA(sample_value)

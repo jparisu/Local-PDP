@@ -3,7 +3,7 @@ Utility functions for lpdp.
 """
 
 
-def helper_function(a, b):
+def helper_function(a: int, b: int) -> int:
     """
     Helper function for common operations.
 
@@ -15,33 +15,3 @@ def helper_function(a, b):
         Combined result
     """
     return a + b
-
-
-def validate_input(data):
-    """
-    Validate input data.
-
-    Args:
-        data: Data to validate
-
-    Returns:
-        True if valid, False otherwise
-    """
-    if data is None:
-        return False
-    return True
-
-
-def process_data(data):
-    """
-    Process input data.
-
-    Args:
-        data: Data to process
-
-    Returns:
-        Processed data
-    """
-    if not validate_input(data):
-        raise ValueError("Invalid input data")
-    return data

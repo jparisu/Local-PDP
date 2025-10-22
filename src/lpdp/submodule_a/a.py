@@ -3,7 +3,7 @@ Module A - Feature attribution core implementation.
 """
 
 
-def function_a(x):
+def function_a(x: int) -> int:
     """
     Example function in module A.
 
@@ -19,7 +19,7 @@ def function_a(x):
 class ClassA:
     """Example class in module A."""
 
-    def __init__(self, value):
+    def __init__(self, value: int):
         """
         Initialize ClassA.
 
@@ -28,7 +28,7 @@ class ClassA:
         """
         self.value = value
 
-    def method_a(self):
+    def method_a(self) -> int:
         """
         Example method.
 
