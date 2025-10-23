@@ -1,4 +1,4 @@
-name: Documentation Check
+name: Documentation check
 
 on:
   push:
@@ -29,10 +29,6 @@ jobs:
         pip install -e ".[docs]"
 
     - name: Build documentation
-      run: |
-        mkdocs build --strict
-
-    - name: Check links in documentation
       run: |
         mkdocs build --strict
 

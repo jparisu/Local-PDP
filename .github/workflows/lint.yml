@@ -1,4 +1,4 @@
-name: Linter, Format and Type Checker
+name: Soft checks
 
 on:
   push:
@@ -10,8 +10,8 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    name: Test Python ${{ matrix.python-version }}
+  lint:
+    name: Test Python
     runs-on: ubuntu-latest
 
     steps:
@@ -35,6 +35,45 @@ jobs:
       run: |
         ruff format --check src/ tests/
 
+
+  types:
+    name: Test Python
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[lint]"
+
     - name: Type check with mypy
       run: |
         mypy src/lpdp
+
+
+  spell-checker:
+    name: Test Python
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[lint]"
+
+    - name: Spell check (codespell)
+      run: codespell spelling/.codespellrc .
