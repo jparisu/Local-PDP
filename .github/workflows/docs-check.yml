@@ -30,7 +30,7 @@ jobs:
 
     - name: Build documentation
       run: |
-        mkdocs build --strict --config-file mkdocs.yml
+        mkdocs build --strict
 
 
   # docs-deploy:
