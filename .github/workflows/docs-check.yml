@@ -1,4 +1,4 @@
-name: Documentation Check
+name: Documentation check
 
 on:
   push:
@@ -30,7 +30,7 @@ jobs:
 
     - name: Build documentation
       run: |
-        mkdocs build --strict --config-file docs/mkdocs.yml
+        mkdocs build --strict --config-file mkdocs.yml
 
 
   # docs-deploy:
