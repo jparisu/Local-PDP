@@ -217,8 +217,8 @@ class Test_BandwidthSpecialMethods:
         bandwidth = Bandwidth(np.array([[1.0]]))
         result1 = bandwidth == "not a bandwidth"
         result2 = bandwidth == 42
-        assert result1 == NotImplemented or result1 == False
-        assert result2 == NotImplemented or result2 == False
+        assert result1 == NotImplemented or not result1
+        assert result2 == NotImplemented or not result2
 
     def test_getitem_single_element(self):
         """Test accessing single element."""
