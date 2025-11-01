@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   lint:
-    name: Test Python
+    name: Test Python linter
     runs-on: ubuntu-latest
 
     steps:
@@ -37,7 +37,7 @@ jobs:
 
 
   types:
-    name: Test Python
+    name: Test Python types
     runs-on: ubuntu-latest
 
     steps:
@@ -59,7 +59,7 @@ jobs:
 
 
   spell-checker:
-    name: Test Python
+    name: Test Python spelling
     runs-on: ubuntu-latest
 
     steps:

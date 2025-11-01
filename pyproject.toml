@@ -46,7 +46,7 @@ docs = [
 
 [project.urls]
 Homepage = "https://github.com/jparisu/faxai"
-Documentation = "https://local-pdp.readthedocs.io/"
+Documentation = "https://faxai.readthedocs.io/"
 Repository = "https://github.com/jparisu/faxai"
 Issues = "https://github.com/jparisu/faxai/issues"
 Changelog = "https://github.com/jparisu/faxai/blob/main/CHANGELOG.md"

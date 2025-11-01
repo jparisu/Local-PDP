@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   coverage:
-    name: Coverage (Python 3.12)
+    name: Coverage test
     runs-on: ubuntu-latest
 
     steps:
