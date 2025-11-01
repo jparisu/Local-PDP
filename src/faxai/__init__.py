@@ -9,11 +9,11 @@ __author__ = "jparisu"
 
 import logging
 
-from . import submodule_a, utils
+from . import mathing, utils
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 __all__ = [
-    "submodule_a",
+    "mathing",
     "utils",
 ]

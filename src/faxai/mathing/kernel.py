@@ -41,8 +41,7 @@ class Kernel(ABC):
             bandwidth (Bandwidth | None): The bandwidth matrix of the kernel.
                 If None, it must be provided when applying the kernel.
         """
-        self._bandwidth = bandwidth
-
+        self._bandwidth: Bandwidth | None = bandwidth
 
     def set_bandwidth(self, bandwidth: Bandwidth) -> None:
         """
@@ -53,6 +52,14 @@ class Kernel(ABC):
         """
         self._bandwidth = bandwidth
 
+    def bandwidth(self) -> Bandwidth | None:
+        """
+        Get the bandwidth of the kernel.
+
+        Returns:
+            Bandwidth | None: The bandwidth matrix of the kernel.
+        """
+        return self._bandwidth
 
     @abstractmethod
     def _apply(self, x: float) -> float:
@@ -73,7 +80,6 @@ class Kernel(ABC):
         """
         raise NotImplementedError(f"{self.__class__.__name__} must implement _apply method.")
 
-
     def apply(self, a: np.ndarray, b: np.ndarray, bandwidth: Bandwidth | None = None) -> float:
         """
         Apply the kernel function to the given points with the specified bandwidth.
@@ -87,20 +93,22 @@ class Kernel(ABC):
         Returns:
             float: The kernel value between the two points. A non-negative real number.
         """
-        bandwidth = bandwidth if bandwidth is not None else self._bandwidth
+        if bandwidth is None:
+            bandwidth = self._bandwidth
+        if bandwidth is None:
+            raise ValueError("Bandwidth must be provided either in the kernel or as an argument.")
 
         # Calculate distance to apply kernel
         d = a - b
-        x = d.T @ np.linalg.inv(bandwidth) @ d
+        x = d.T @ bandwidth.inverse() @ d
 
         # Apply specific kernel
         k = self._apply(x)
 
         # Normalize by bandwidth determinant
-        result = k / math.sqrt(np.linalg.det(bandwidth))
+        result = k / math.sqrt(bandwidth.determinant())
 
         return result
-
 
     def __str__(self) -> str:
         """
@@ -110,7 +118,6 @@ class Kernel(ABC):
             str: A string representation including the kernel class name and bandwidth.
         """
         return f"{self.__class__.__name__}_{self._bandwidth}"
-
 
     def maximum(self, bandwidth: Bandwidth | None = None) -> float:
         """
@@ -126,7 +133,6 @@ class Kernel(ABC):
             float: The maximum kernel value.
         """
         return self.apply(0, 0, bandwidth=bandwidth)
-
 
 
 class UnivariateKernel(Kernel):
@@ -153,7 +159,6 @@ class UnivariateKernel(Kernel):
 
         # Convert bandwidth to numpy matrix 1x1
         super().__init__(bandwidth=bandwidth)
-
 
     def apply(self, a: float, b: float, bandwidth: Bandwidth | float | None = None) -> float:
         """
@@ -258,7 +263,7 @@ class GaussianKernel(Kernel):
         Returns:
             float: The kernel value following the standard normal distribution.
         """
-        return np.exp(-0.5 * x**2) / math.sqrt(2 * math.pi)
+        return math.exp(-0.5 * x**2) / math.sqrt(2 * math.pi)
 
 
 class DeltaKernel(UniformKernel):

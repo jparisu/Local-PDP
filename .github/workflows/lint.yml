@@ -76,4 +76,4 @@ jobs:
         pip install -e ".[lint]"
 
     - name: Spell check (codespell)
-      run: codespell spelling/.codespellrc .
+      run: codespell .spelling/.codespellrc .
