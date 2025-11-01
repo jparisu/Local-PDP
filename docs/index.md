@@ -7,32 +7,11 @@ This library provides tools for Machine Learning Explainability using Feature At
 
 `faxai` is a Python library designed to help data scientists and machine learning practitioners understand and explain their models through advanced feature attribution techniques.
 
-## Features
-
-- **Submodule A**: Core functionality for feature attribution analysis
-- **Submodule B**: Additional supporting tools for explainability
-- **Utilities**: Helper functions for common operations
-
-## Quick Start
-
-```python
-from faxai.submodule_a.a import function_a, ClassA
-from faxai.submodule_b.b import function_b, ClassB
-from faxai import utils
-
-# Use function_a
-result = function_a(5)
-print(result)  # Output: 10
-
-# Use ClassA
-obj = ClassA(42)
-print(obj.method_a())  # Output: 42
-```
 
 ## Installation
 
 ```bash
-pip install faxai
+pip install git+https://github.com/jparisu/faxai.git
 ```
 
 ## Documentation Structure
