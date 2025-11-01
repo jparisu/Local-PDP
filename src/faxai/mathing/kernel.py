@@ -171,7 +171,7 @@ class UnivariateKernel(Kernel):
         # Convert bandwidth to numpy matrix 1x1
         super().__init__(bandwidth=bandwidth)
 
-    def apply(self, a: float, b: float, bandwidth: Bandwidth | float | None = None) -> float:  # type: ignore[override]
+    def univariate_apply(self, a: float, b: float, bandwidth: Bandwidth | float | None = None) -> float:
         """
         Apply the kernel function to the given scalar points with the specified bandwidth.
 
