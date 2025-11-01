@@ -61,6 +61,17 @@ class Kernel(ABC):
         """
         return self._bandwidth
 
+    def dimension(self) -> int | None:
+        """
+        Get the dimension of the kernel based on its bandwidth.
+
+        Returns:
+            int | None: The dimension of the kernel, or None if bandwidth is not set.
+        """
+        if self._bandwidth is None:
+            return None
+        return self._bandwidth.dimension()
+
     @abstractmethod
     def _apply(self, x: float) -> float:
         """
@@ -132,7 +143,7 @@ class Kernel(ABC):
         Returns:
             float: The maximum kernel value.
         """
-        return self.apply(0, 0, bandwidth=bandwidth)
+        return self.apply(np.zeros(self.dimension()), np.zeros(self.dimension()), bandwidth=bandwidth)
 
 
 class UnivariateKernel(Kernel):
@@ -160,7 +171,7 @@ class UnivariateKernel(Kernel):
         # Convert bandwidth to numpy matrix 1x1
         super().__init__(bandwidth=bandwidth)
 
-    def apply(self, a: float, b: float, bandwidth: Bandwidth | float | None = None) -> float:
+    def apply(self, a: float, b: float, bandwidth: Bandwidth | float | None = None) -> float:  # type: ignore[override]
         """
         Apply the kernel function to the given scalar points with the specified bandwidth.
 

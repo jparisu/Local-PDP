@@ -162,6 +162,16 @@ class Bandwidth:
 
         return self._determinant
 
+    def dimension(self) -> int:
+        """
+        Get the dimension of the bandwidth matrix.
+
+        Returns:
+            int: The dimension of the bandwidth matrix (number of rows or columns).
+        """
+
+        return int(self._matrix.shape[0])
+
     ######################################################
     # Variance construction bandwidth methods
 
