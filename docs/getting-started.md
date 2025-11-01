@@ -1,6 +1,6 @@
 # Getting Started
 
-This guide will help you get started with `lpdp`.
+This guide will help you get started with `faxai`.
 First, make sure to install the library: [Installation](installation.md)
 
 ## Basic Usage
@@ -8,7 +8,7 @@ First, make sure to install the library: [Installation](installation.md)
 ### Using Submodule A
 
 ```python
-from lpdp.submodule_a.a import function_a, ClassA
+from faxai.submodule_a.a import function_a, ClassA
 
 # Use function_a
 result = function_a(10)
@@ -23,7 +23,7 @@ print(f"Value: {value}")  # Output: Value: 100
 ### Using Submodule B
 
 ```python
-from lpdp.submodule_b.b import function_b, ClassB
+from faxai.submodule_b.b import function_b, ClassB
 
 # Use function_b
 result = function_b(5)
@@ -38,7 +38,7 @@ print(f"Data: {data}")  # Output: Data: [1, 2, 3]
 ### Using Utilities
 
 ```python
-from lpdp import utils
+from faxai import utils
 
 # Use helper function
 result = utils.helper_function(5, 10)
@@ -55,7 +55,7 @@ print(f"Processed: {processed}")  # Output: Processed: {'key': 'value'}
 
 
 ### Logging
-`lpdp` emits logs via the standard `logging` library.
+`faxai` emits logs via the standard `logging` library.
 
 Enable globally:
 ```python
@@ -68,7 +68,7 @@ logging.basicConfig(level=logging.INFO)
 
 ### Import Errors
 
-If you encounter import errors, make sure lpdp is properly installed:
+If you encounter import errors, make sure faxai is properly installed:
 
 ```bash
 pip install -e .
@@ -86,6 +86,6 @@ Make sure you're using Python 3.8 or higher.
 
 ## Getting Help
 
-- Open an issue on [GitHub](https://github.com/jparisu/Local-PDP/issues)
+- Open an issue on [GitHub](https://github.com/jparisu/faxai/issues)
 - Check existing documentation
 - Review the examples directory

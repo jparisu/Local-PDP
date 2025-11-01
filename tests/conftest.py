@@ -1,5 +1,5 @@
 """
-Pytest configuration file for lpdp tests.
+Pytest configuration file for faxai tests.
 """
 
 import sys

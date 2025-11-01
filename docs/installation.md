@@ -1,20 +1,20 @@
 # Getting Started
 
-This guide will help you get started with `lpdp`.
+This guide will help you get started with `faxai`.
 
 ## Installation
 
 ### From PyPI
 
 ```bash
-pip install lpdp
+pip install faxai
 ```
 
 ### From Source
 
 ```bash
-git clone https://github.com/jparisu/Local-PDP.git
-cd Local-PDP
+git clone https://github.com/jparisu/faxai.git
+cd faxai
 pip install -e .
 ```
 

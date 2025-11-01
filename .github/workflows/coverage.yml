@@ -31,7 +31,7 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          pytest -v --cov=lpdp --cov-report=xml --cov-report=term
+          pytest -v --cov=faxai --cov-report=xml --cov-report=term
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
