@@ -2,7 +2,7 @@
 Tests for utils module.
 """
 
-from lpdp.utils import utils
+from faxai.utils import utils
 
 
 def test_helper_function():

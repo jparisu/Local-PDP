@@ -1,10 +1,10 @@
-site_name: lpdp Documentation
+site_name: faxai Documentation
 site_description: Feature Attribution Model-Agnostic Python library for Machine Learning Explainability
 site_author: jparisu
-site_url: https://local-pdp.readthedocs.io/
+site_url: https://faxai.readthedocs.io/
 
-repo_name: jparisu/Local-PDP
-repo_url: https://github.com/jparisu/Local-PDP
+repo_name: jparisu/faxai
+repo_url: https://github.com/jparisu/faxai
 edit_uri: edit/main/docs
 
 # Theme
@@ -42,4 +42,4 @@ nav:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/jparisu/Local-PDP
+      link: https://github.com/jparisu/faxai

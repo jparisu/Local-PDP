@@ -12,4 +12,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentation
 - CI/CD workflows with GitHub Actions
 
-[Unreleased]: https://github.com/jparisu/Local-PDP/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/jparisu/faxai/compare/v0.1.0...HEAD

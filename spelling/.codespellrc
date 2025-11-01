@@ -9,4 +9,4 @@ check-hidden = false
 # Add your project words here:
 ignore-words = spelling/.codespell-words.txt
 # Or quick comma list (use either this or the file above)
-# ignore-words-list = lpdp,sklearn,ndarray
+# ignore-words-list = faxai,sklearn,ndarray

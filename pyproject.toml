@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "lpdp"
+name = "faxai"
 version = "0.1.0"
 description = "Feature Attribution Model-Agnostic Python library for Machine Learning Explainability"
 readme = { file = "README.md", content-type = "text/markdown" }
@@ -19,7 +19,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-keywords = ["machine-learning", "explainability", "feature-attribution", "pdp", "local-pdp", "lpdp"]
+keywords = ["machine-learning", "explainability", "feature-attribution", "pdp", "local-pdp", "faxai"]
 requires-python = ">=3.9"
 dependencies = [
     "numpy>=2.0.0",
@@ -45,18 +45,18 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/jparisu/Local-PDP"
-Documentation = "https://local-pdp.readthedocs.io/"
-Repository = "https://github.com/jparisu/Local-PDP"
-Issues = "https://github.com/jparisu/Local-PDP/issues"
-Changelog = "https://github.com/jparisu/Local-PDP/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/jparisu/faxai"
+Documentation = "https://faxai.readthedocs.io/"
+Repository = "https://github.com/jparisu/faxai"
+Issues = "https://github.com/jparisu/faxai/issues"
+Changelog = "https://github.com/jparisu/faxai/blob/main/CHANGELOG.md"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["lpdp*"]
+include = ["faxai*"]
 exclude = ["tests*"]
 
 [tool.pytest.ini_options]
@@ -71,7 +71,7 @@ addopts = [
 ]
 
 [tool.coverage.run]
-source = ["lpdp"]
+source = ["faxai"]
 branch = true
 
 [tool.coverage.report]
@@ -105,7 +105,7 @@ select = [
 "__init__.py" = ["F401"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["lpdp"]
+known-first-party = ["faxai"]
 
 [tool.mypy]
 python_version = "3.9"
@@ -125,3 +125,6 @@ module = [
     "sklearn.*",
 ]
 ignore_missing_imports = true
+
+[tool.codespell]
+skip = '*.lock,.git,*.egg-info,build,dist'

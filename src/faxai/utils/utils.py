@@ -1,5 +1,5 @@
 """
-Utility functions for lpdp.
+Utility functions for faxai.
 """
 
 
