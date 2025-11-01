@@ -1,6 +1,7 @@
-# Local-PDP Documentation
+# `faxai` Documentation
 
-Welcome to the `faxai` documentation! This library provides tools for Machine Learning Explainability using Feature Attribution Model-Agnostic techniques as ICE, PDP and l-PDP (Local Partial Dependence Plot) analysis.
+Welcome to the `faxai` documentation!
+This library provides tools for Machine Learning Explainability using Feature Attribution Model-Agnostic techniques as ICE, PDP and l-PDP (Local Partial Dependence Plot) analysis.
 
 ## Overview
 
