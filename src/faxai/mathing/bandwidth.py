@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+
 import numpy as np
 import pandas as pd
 
@@ -23,33 +24,47 @@ class Bandwidth:
     This class provides an interface for efficient matrix computation and different bandwidth selection methods.
     """
 
-    def __init__(self, matrix: np.array):
+    def __init__(self, matrix: np.ndarray):
         """
-        Build a bandwidth with the given matrix.
+        Initialize a bandwidth with the given matrix.
 
         Args:
-            matrix: The bandwidth matrix.
+            matrix (np.ndarray): The bandwidth matrix. Must be a positive definite,
+                symmetric, square NxN matrix with non-zero determinant.
+
+        Raises:
+            ValueError: If the matrix does not satisfy the bandwidth requirements.
         """
 
-        self._matrix : np.array = matrix
+        self._matrix: np.ndarray = matrix
 
         # Cache values
-        self._determinant : float = None
-        self._inverse : np.array = None
+        self._determinant: float | None = None
+        self._inverse: np.ndarray | None = None
 
         # Validate bandwidth matrix
         self.check_bandwidth_matrix(throw=True)
 
 
-    def check_bandwidth_matrix(self, throw: bool = True):
+    def check_bandwidth_matrix(self, throw: bool = True) -> bool:
         """
-        Check if the given matrix is a valid bandwidth matrix.
+        Check if the bandwidth matrix satisfies all required properties.
+
+        Validates that the matrix is:
+        - Square (NxN)
+        - Positive (all elements > 0)
+        - Symmetric
+        - Has a non-zero determinant
 
         Args:
-            matrix: The bandwidth matrix to check.
+            throw (bool): If True, raises ValueError on validation failure.
+                If False, returns False on validation failure. Defaults to True.
+
+        Returns:
+            bool: True if the matrix is valid, False otherwise (only if throw=False).
 
         Raises:
-            ValueError: If the matrix is not positive definite, not symmetric, or not NxN.
+            ValueError: If throw=True and the matrix is invalid.
         """
 
         # Check matrix is square
@@ -79,26 +94,28 @@ class Bandwidth:
         return True
 
 
-    def matrix(self) -> np.array:
+    def matrix(self) -> np.ndarray:
         """
         Get the bandwidth matrix.
 
         Returns:
-            The bandwidth matrix.
+            np.ndarray: The bandwidth matrix.
         """
 
         return self._matrix
 
 
-    def inverse(self) -> np.array:
+    def inverse(self) -> np.ndarray:
         """
         Get the inverse of the bandwidth matrix.
 
+        The result is cached for efficiency on subsequent calls.
+
         Returns:
-            The inverse of the bandwidth matrix.
+            np.ndarray: The inverse of the bandwidth matrix.
 
         Note:
-            Cached for efficiency.
+            The inverse is computed once and cached for subsequent calls.
         """
 
         if self._inverse is None:
@@ -111,11 +128,13 @@ class Bandwidth:
         """
         Get the determinant of the bandwidth matrix.
 
+        The result is cached for efficiency on subsequent calls.
+
         Returns:
-            The determinant of the bandwidth matrix.
+            float: The determinant of the bandwidth matrix.
 
         Note:
-            Cached for efficiency.
+            The determinant is computed once and cached for subsequent calls.
         """
 
         if self._determinant is None:
@@ -129,14 +148,18 @@ class Bandwidth:
 
     @staticmethod
     def reckon_variance_bandwidth(
-            sigma: np.array,
+            sigma: np.ndarray,
             proportion: float = 1.0) -> Bandwidth:
         """
-        Reckon the variance bandwidth for multivariate data.
+        Compute the variance bandwidth for multivariate data.
 
         Args:
-            sigma: Covariance matrix of the data.
-            proportion: Proportion to use over the variance.
+            sigma (np.ndarray): Covariance matrix of the data.
+            proportion (float): Scaling factor to apply to the variance.
+                Defaults to 1.0 (no scaling).
+
+        Returns:
+            Bandwidth: The variance-based bandwidth matrix.
         """
         return Bandwidth(proportion * sigma)
 
@@ -145,14 +168,15 @@ class Bandwidth:
             df: pd.DataFrame,
             proportion: float = 1.0) -> Bandwidth:
         """
-        Reckon the variance bandwidth for multivariate data from a pandas DataFrame.
+        Compute the variance bandwidth from a pandas DataFrame.
 
         Args:
-            df: The data as a pandas DataFrame.
-            proportion: Proportion to use over the variance.
+            df (pd.DataFrame): The data as a pandas DataFrame.
+            proportion (float): Scaling factor to apply to the variance.
+                Defaults to 1.0 (no scaling).
 
         Returns:
-            The variance bandwidth matrix.
+            Bandwidth: The variance-based bandwidth matrix computed from the data.
         """
         sigma = df.cov().to_numpy()
         return Bandwidth.reckon_variance_bandwidth(sigma, proportion)
@@ -165,13 +189,19 @@ class Bandwidth:
     @staticmethod
     def reckon_silverman_bandwidth(
             samples: int,
-            sigma: np.array) -> Bandwidth:
+            sigma: np.ndarray) -> Bandwidth:
         """
-        Reckon the Silverman bandwidth for multivariate data.
+        Compute the Silverman bandwidth for multivariate data.
+
+        Silverman's rule of thumb provides an optimal bandwidth for kernel density
+        estimation under certain assumptions.
 
         Args:
-            samples: The number of data points.
-            sigma: The standard deviation for each dimension of the data.
+            samples (int): The number of data points in the dataset.
+            sigma (np.ndarray): The standard deviation for each dimension of the data.
+
+        Returns:
+            Bandwidth: The Silverman bandwidth matrix.
         """
 
         dimension = sigma.shape[0]
@@ -188,13 +218,13 @@ class Bandwidth:
     def reckon_silverman_bandwidth_from_data(
             df: pd.DataFrame) -> Bandwidth:
         """
-        Reckon the Silverman bandwidth for multivariate data from a pandas DataFrame.
+        Compute the Silverman bandwidth from a pandas DataFrame.
 
         Args:
-            df: The data as a pandas DataFrame.
+            df (pd.DataFrame): The data as a pandas DataFrame.
 
         Returns:
-            The Silverman bandwidth matrix.
+            Bandwidth: The Silverman bandwidth matrix computed from the data.
         """
 
         n = df.shape[0]
@@ -206,13 +236,39 @@ class Bandwidth:
     ###########################
     # Numpy matrix methods
 
-    def __eq__(self, other: Bandwidth) -> bool:
-        return np.array_equal(self._matrix, other.matrix())
+    def __eq__(self, other: object) -> bool:
+        """
+        Check equality with another Bandwidth object.
 
-    def __getitem__(self, key):
+        Args:
+            other (object): The object to compare with.
+
+        Returns:
+            bool: True if the bandwidth matrices are equal, False otherwise.
+        """
+        if not isinstance(other, Bandwidth):
+            return NotImplemented
+        return bool(np.array_equal(self._matrix, other.matrix()))
+
+    def __getitem__(self, key: int | tuple[int, int]) -> float | np.ndarray:
+        """
+        Access elements of the bandwidth matrix using indexing.
+
+        Args:
+            key (int | tuple[int, int]): The index or indices to access.
+
+        Returns:
+            float | np.ndarray: The value(s) at the specified index/indices.
+        """
         return self._matrix[key]
 
     def __str__(self) -> str:
+        """
+        Return a string representation of the bandwidth matrix.
+
+        Returns:
+            str: String representation of the bandwidth matrix.
+        """
         return str(self._matrix)
 
 
@@ -225,10 +281,10 @@ class Bandwidth:
         Build an identity bandwidth matrix of the given dimension.
 
         Args:
-            dimension: The dimension of the identity matrix.
+            dimension (int): The dimension of the identity matrix.
 
         Returns:
-            The identity bandwidth matrix.
+            Bandwidth: The identity bandwidth matrix.
         """
 
         matrix = np.eye(dimension)
@@ -237,25 +293,27 @@ class Bandwidth:
     @staticmethod
     def build_univariate(h: float) -> Bandwidth:
         """
-        Build a univariate bandwidth matrix with the given bandwidth.
+        Build a univariate bandwidth matrix with the given bandwidth value.
+
         Args:
-            h: The bandwidth.
+            h (float): The bandwidth value for the single dimension.
+
         Returns:
-            The univariate bandwidth matrix.
+            Bandwidth: A 1x1 bandwidth matrix.
         """
         matrix = np.array([[h]])
         return Bandwidth(matrix)
 
     @staticmethod
-    def build_diagonal(diagonal: np.array) -> Bandwidth:
+    def build_diagonal(diagonal: np.ndarray) -> Bandwidth:
         """
         Build a diagonal bandwidth matrix with the given diagonal elements.
 
         Args:
-            diagonal: The diagonal elements of the matrix.
+            diagonal (np.ndarray): The diagonal elements of the matrix.
 
         Returns:
-            The diagonal bandwidth matrix.
+            Bandwidth: The diagonal bandwidth matrix.
         """
 
         matrix = np.diag(diagonal)
@@ -264,13 +322,16 @@ class Bandwidth:
     @staticmethod
     def build_delta(dimension: int) -> Bandwidth:
         """
-        Build a delta bandwidth matrix of the given dimension.
+        Build a delta bandwidth matrix representing an infinitely narrow distribution.
+
+        This creates a diagonal matrix with extremely small values to approximate
+        a Dirac delta function.
 
         Args:
-            dimension: The dimension of the delta matrix.
+            dimension (int): The dimension of the delta matrix.
 
         Returns:
-            The delta bandwidth matrix.
+            Bandwidth: The delta bandwidth matrix with infinitesimally small values.
         """
 
         matrix = np.diag((dimension, dimension), EXTREME_BANDWIDTH_VALUE**-1)
@@ -279,13 +340,16 @@ class Bandwidth:
     @staticmethod
     def build_infinite(dimension: int) -> Bandwidth:
         """
-        Build an infinite bandwidth matrix of the given dimension.
+        Build an infinite bandwidth matrix representing an extremely wide distribution.
+
+        This creates a diagonal matrix with extremely large values to approximate
+        a uniform distribution over the entire space.
 
         Args:
-            dimension: The dimension of the infinite matrix.
+            dimension (int): The dimension of the infinite matrix.
 
         Returns:
-            The infinite bandwidth matrix.
+            Bandwidth: The infinite bandwidth matrix with extremely large values.
         """
         matrix = np.diag((dimension, dimension), EXTREME_BANDWIDTH_VALUE)
         return Bandwidth(matrix)

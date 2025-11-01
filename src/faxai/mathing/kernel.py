@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+import logging
 import math
+from abc import ABC, abstractmethod
+
 import numpy as np
 import pandas as pd
-import logging
 
 from faxai.mathing.bandwidth import Bandwidth
 
@@ -34,21 +35,21 @@ class Kernel(ABC):
 
     def __init__(self, bandwidth: Bandwidth | None = None):
         """
-        Build a kernel with the given bandwidth.
-        Args:
-            bandwidth: The bandwidth of the kernel.
+        Initialize a kernel with the given bandwidth.
 
-        If bandwidth is None, it must be provided when applying the kernel.
+        Args:
+            bandwidth (Bandwidth | None): The bandwidth matrix of the kernel.
+                If None, it must be provided when applying the kernel.
         """
         self._bandwidth = bandwidth
 
 
-    def set_bandwidth(self, bandwidth: Bandwidth):
+    def set_bandwidth(self, bandwidth: Bandwidth) -> None:
         """
         Set the bandwidth of the kernel.
 
         Args:
-            bandwidth: The bandwidth of the kernel.
+            bandwidth (Bandwidth): The bandwidth matrix of the kernel.
         """
         self._bandwidth = bandwidth
 
@@ -58,22 +59,33 @@ class Kernel(ABC):
         """
         Apply the kernel function to the given distance.
 
-        Bandwidth agnostic function to simplify the implementation of stationary kernels.
+        This is a bandwidth-agnostic function to simplify the implementation
+        of stationary kernels.
+
+        Args:
+            x (float): The Mahalanobis distance between two points.
+
+        Returns:
+            float: The kernel value at the given distance.
+
+        Raises:
+            NotImplementedError: This method must be implemented by subclasses.
         """
         raise NotImplementedError(f"{self.__class__.__name__} must implement _apply method.")
 
 
-    def apply(self, a: np.array, b: np.array, bandwidth: Bandwidth | None = None) -> float:
+    def apply(self, a: np.ndarray, b: np.ndarray, bandwidth: Bandwidth | None = None) -> float:
         """
-        Apply the kernel function to the given points a and b with the specified bandwidth.
+        Apply the kernel function to the given points with the specified bandwidth.
 
         Args:
-            a: First point.
-            b: Second point.
-            bandwidth: The bandwidth of the kernel. If None, the kernel's bandwidth is used.
+            a (np.ndarray): First point as a numpy array.
+            b (np.ndarray): Second point as a numpy array.
+            bandwidth (Bandwidth | None): The bandwidth matrix of the kernel.
+                If None, the kernel's internal bandwidth is used.
 
         Returns:
-            The result of applying the kernel function. A non-negative real number.
+            float: The kernel value between the two points. A non-negative real number.
         """
         bandwidth = bandwidth if bandwidth is not None else self._bandwidth
 
@@ -91,10 +103,28 @@ class Kernel(ABC):
 
 
     def __str__(self) -> str:
-        return f"{self.__class__.__name__}_{self.bandwidth:.3f}"
+        """
+        Return a string representation of the kernel.
+
+        Returns:
+            str: A string representation including the kernel class name and bandwidth.
+        """
+        return f"{self.__class__.__name__}_{self._bandwidth}"
 
 
-    def maximum(self, bandwidth: float=None) -> float:
+    def maximum(self, bandwidth: Bandwidth | None = None) -> float:
+        """
+        Calculate the maximum value of the kernel function.
+
+        The maximum occurs at zero distance (when a == b).
+
+        Args:
+            bandwidth (Bandwidth | None): The bandwidth matrix to use for calculation.
+                If None, the kernel's internal bandwidth is used.
+
+        Returns:
+            float: The maximum kernel value.
+        """
         return self.apply(0, 0, bandwidth=bandwidth)
 
 
@@ -109,12 +139,13 @@ class UnivariateKernel(Kernel):
 
     def __init__(self, bandwidth: Bandwidth | float | None = None):
         """
-        Build a kernel with the given bandwidth.
+        Initialize a univariate kernel with the given bandwidth.
 
         Args:
-            bandwidth: The bandwidth of the kernel.
-
-        If bandwidth is None, it must be provided when applying the kernel.
+            bandwidth (Bandwidth | float | None): The bandwidth of the kernel.
+                Can be a Bandwidth object, a float value, or None.
+                If a float is provided, it will be converted to a Bandwidth object.
+                If None, it must be provided when applying the kernel.
         """
         # If bandwidth is a float, convert it to UnivariateBandwidth
         if isinstance(bandwidth, float):
@@ -126,15 +157,17 @@ class UnivariateKernel(Kernel):
 
     def apply(self, a: float, b: float, bandwidth: Bandwidth | float | None = None) -> float:
         """
-        Apply the kernel function to the given points a and b with the specified bandwidth.
+        Apply the kernel function to the given scalar points with the specified bandwidth.
 
         Args:
-            a: First point.
-            b: Second point.
-            bandwidth: The bandwidth of the kernel. If None, the kernel's bandwidth is used.
+            a (float): First point as a scalar value.
+            b (float): Second point as a scalar value.
+            bandwidth (Bandwidth | float | None): The bandwidth of the kernel.
+                Can be a Bandwidth object, a float value, or None.
+                If None, the kernel's internal bandwidth is used.
 
         Returns:
-            The result of applying the kernel function. A non-negative real number.
+            float: The kernel value between the two points. A non-negative real number.
         """
         # Convert inputs to numpy arrays
         a_array = np.array([a])
@@ -154,8 +187,17 @@ class UniformKernel(Kernel):
     The uniform kernel is defined as 0.5 if |x| <= 1, and 0 otherwise.
     """
 
-    def _apply(self, a: float) -> float:
-        return 0.5 if abs(a) <= 1 else 0
+    def _apply(self, x: float) -> float:
+        """
+        Apply the uniform kernel function.
+
+        Args:
+            x (float): The Mahalanobis distance between two points.
+
+        Returns:
+            float: 0.5 if the distance is less than or equal to 1, otherwise 0.
+        """
+        return 0.5 if abs(x) <= 1 else 0
 
 
 class TriangularKernel(Kernel):
@@ -166,6 +208,15 @@ class TriangularKernel(Kernel):
     """
 
     def _apply(self, x: float) -> float:
+        """
+        Apply the triangular kernel function.
+
+        Args:
+            x (float): The Mahalanobis distance between two points.
+
+        Returns:
+            float: The kernel value, decreasing linearly from 1 to 0 as distance increases.
+        """
         return max(0, 1 - abs(x))
 
 
@@ -177,6 +228,15 @@ class EpanechnikovKernel(Kernel):
     """
 
     def _apply(self, x: float) -> float:
+        """
+        Apply the Epanechnikov kernel function.
+
+        Args:
+            x (float): The Mahalanobis distance between two points.
+
+        Returns:
+            float: The kernel value, decreasing quadratically from 0.75 to 0.
+        """
         return max(0, 1 - x**2) * 3 / 4
 
 
@@ -189,6 +249,15 @@ class GaussianKernel(Kernel):
     """
 
     def _apply(self, x: float) -> float:
+        """
+        Apply the Gaussian kernel function.
+
+        Args:
+            x (float): The Mahalanobis distance between two points.
+
+        Returns:
+            float: The kernel value following the standard normal distribution.
+        """
         return np.exp(-0.5 * x**2) / math.sqrt(2 * math.pi)
 
 
@@ -203,7 +272,13 @@ class DeltaKernel(UniformKernel):
         This kernel is defined as a uniform kernel with an extremely small bandwidth.
     """
 
-    def __init__(self, dimension):
+    def __init__(self, dimension: int):
+        """
+        Initialize a delta kernel with the specified dimension.
+
+        Args:
+            dimension (int): The dimensionality of the kernel.
+        """
         super().__init__(bandwidth=Bandwidth.build_delta(dimension))
 
 
@@ -217,13 +292,25 @@ class InfiniteKernel(UniformKernel):
         This kernel is defined as a uniform kernel with an extremely large bandwidth.
     """
 
-    def __init__(self, dimension):
+    def __init__(self, dimension: int):
+        """
+        Initialize an infinite kernel with the specified dimension.
+
+        Args:
+            dimension (int): The dimensionality of the kernel.
+        """
         super().__init__(bandwidth=Bandwidth.build_infinite(dimension))
 
 
 def create_default_kernel(df: pd.DataFrame) -> Kernel:
     """
     Create a default Gaussian kernel using Silverman's rule of thumb for bandwidth selection.
+
+    Args:
+        df (pd.DataFrame): The data used to compute the optimal bandwidth.
+
+    Returns:
+        Kernel: A GaussianKernel instance with bandwidth computed using Silverman's rule.
     """
     bandwidth = Bandwidth.reckon_silverman_bandwidth_from_data(df)
     return GaussianKernel(bandwidth)
