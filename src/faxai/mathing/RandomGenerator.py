@@ -112,3 +112,45 @@ class RandomGenerator:
             None. The input sequence is modified in place.
         """
         self._rng.shuffle(seq)
+
+    def integers(self, low: int, high: int, n: int = 1) -> list[int]:
+        """
+        Generate samples of random integers in the range ``[low, high)``.
+
+        Args:
+            low: Lower bound (inclusive).
+            high: Upper bound (exclusive).
+            n: Number of samples to generate.
+
+        Returns:
+            A list of ``n`` integers drawn uniformly from ``[low, high)``.
+        """
+        return [self._rng.randint(low, high - 1) for _ in range(n)]
+
+    def gauss(self, mean: float, std: float, n: int = 1) -> list[float]:
+        """
+        Generate samples from a normal (Gaussian) distribution.
+
+        Args:
+            mean: Mean of the normal distribution.
+            std: Standard deviation of the normal distribution.
+            n: Number of samples to generate.
+
+        Returns:
+            A list of ``n`` samples drawn from the specified normal distribution.
+        """
+        return [self._rng.gauss(mean, std) for _ in range(n)]
+
+    def uniform(self, low: float, high: float, n: int = 1) -> list[float]:
+        """
+        Generate samples from a uniform distribution over ``[a, b)``.
+
+        Args:
+            a: Lower bound of the uniform distribution (inclusive).
+            b: Upper bound of the uniform distribution (exclusive).
+            n: Number of samples to generate.
+
+        Returns:
+            A list of ``n`` samples drawn from the specified uniform distribution.
+        """
+        return [self._rng.uniform(low, high) for _ in range(n)]
