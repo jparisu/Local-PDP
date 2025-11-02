@@ -15,14 +15,20 @@ logging.basicConfig(level=logging.DEBUG)
 
 import numpy as np
 
-from faxai.mathing.kernel import Bandwidth
+from faxai.mathing.distribution.parametric_distributions import NormalDistribution, UniformDistribution
+from faxai.mathing.distribution.UnionDistribution import UnionDistribution
+from faxai.mathing.RandomGenerator import RandomGenerator
 
-matrix = np.array([[0.2, 0.01], [0.01, 0.5]])
+n = NormalDistribution(mean=1.0, std=1.0)
+u = UniformDistribution(low=-1.0, high=3.0)
 
-if np.any(matrix <= 0):
-    logging.error("Bandwidth matrix must have all positive values.")
+mix = UnionDistribution([n, u])
 
-try:
-    print(Bandwidth.reckon_silverman_bandwidth(samples=100, sigma=np.array([1.0, 2.0])))
-except Exception as e:
-    logging.error("Error computing Silverman bandwidth: %s", e)
+print("Mixture Mean:", mix.mean())
+print("Mixture Std Dev:", mix.std())
+
+x = np.linspace(-5, 5, 11)
+
+for i in x:
+    print(f"x={i}:  PDF={mix.pdf(np.array([i]))[0]}, CDF={mix.cdf(np.array([i]))[0]}")
+    print()
