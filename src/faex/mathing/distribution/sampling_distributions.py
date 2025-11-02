@@ -218,13 +218,13 @@ class HistogramDistribution(Distribution):
 
         cumsum = np.cumsum(self._probabilities)
 
+        # For values before the first bin edge
+        result[x < self._bin_edges[0]] = 0.0
+
+        # For values in each bin, return cumulative probability up to and including this bin
         for i in range(len(self._bin_edges) - 1):
-            # For values in this bin, return cumulative up to previous bins
             mask = (x >= self._bin_edges[i]) & (x < self._bin_edges[i + 1])
-            if i == 0:
-                result[mask] = 0.0
-            else:
-                result[mask] = cumsum[i - 1]
+            result[mask] = cumsum[i]
 
         # For values at or beyond the last edge
         mask = x >= self._bin_edges[-1]
@@ -415,12 +415,13 @@ class WeightedDistribution(Distribution):
 
         cumsum = np.cumsum(self._probabilities)
 
+        # For values before the first bin edge
+        result[x < self._bin_edges[0]] = 0.0
+
+        # For values in each bin, return cumulative probability up to and including this bin
         for i in range(len(self._bin_edges) - 1):
             mask = (x >= self._bin_edges[i]) & (x < self._bin_edges[i + 1])
-            if i == 0:
-                result[mask] = 0.0
-            else:
-                result[mask] = cumsum[i - 1]
+            result[mask] = cumsum[i]
 
         # For values at or beyond the last edge
         mask = x >= self._bin_edges[-1]

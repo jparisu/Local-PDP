@@ -76,6 +76,10 @@ class KernelDensityDistribution(Distribution):
         # (uniform, triangular, Epanechnikov), we could use tighter bounds.
         # For unbounded kernels (Gaussian), we use wide bounds.
         # This may not be accurate for extreme cases or very small/large bandwidths.
+        # ISSUE: The bounds of ±10√(bandwidth) may be insufficient for accurate variance
+        # calculation. For Gaussian kernels, 99.99% of mass is within ±4σ, but the
+        # relationship between bandwidth and σ depends on the kernel implementation.
+        # Consider using kernel-specific bounds or adaptive integration.
         bandwidth = self._kernel.bandwidth()
         if bandwidth is None:
             raise ValueError("Kernel bandwidth is not set")
@@ -189,6 +193,9 @@ class KernelDensityDistribution(Distribution):
         # NOTE: This can be slow if max_pdf is small or if the kernel has a complex shape.
         # A more sophisticated approach would use inverse transform sampling or
         # mixture sampling for specific kernel types.
+        # ISSUE: The sampling method is kernel-agnostic, which may not be optimal for
+        # all kernel types. For specific kernels, consider implementing kernel-specific
+        # sampling methods.
         max_iterations = n * 1000  # Prevent infinite loops
         iterations = 0
 
@@ -206,6 +213,10 @@ class KernelDensityDistribution(Distribution):
             # Fallback: if rejection sampling fails, sample near the center
             # NOTE: This is a fallback to prevent complete failure, but it
             # may not accurately represent the distribution.
+            # ISSUE: This fallback assumes Gaussian noise, which is incorrect for
+            # non-Gaussian kernels (e.g., uniform, triangular). For production use,
+            # implement kernel-specific fallback sampling or use a more robust
+            # primary sampling method.
             remaining = n - len(samples)
             fallback_samples = rng.gauss(mean=self._center, std=np.sqrt(bandwidth_value), n=remaining)
             samples.extend(fallback_samples)
@@ -403,6 +414,13 @@ class KernelDensityEstimationDistribution(Distribution):
             # NOTE: This assumes a Gaussian-like kernel. For other kernel types
             # (uniform, triangular, etc.), the noise distribution should be different.
             # For example, uniform kernel would use uniform noise in [-h, h].
+            # ISSUE: This implementation always uses Gaussian noise regardless of kernel type.
+            # For non-Gaussian kernels, this produces incorrect sample distributions.
+            # A proper implementation should:
+            # - For Gaussian kernels: use Gaussian noise (current implementation)
+            # - For Uniform kernels: use uniform noise in [-sqrt(bandwidth), +sqrt(bandwidth)]
+            # - For other kernels: use appropriate noise matching the kernel shape
+            # Consider adding a kernel-specific random_sample method to the Kernel class.
             noise = rng.gauss(mean=0.0, std=np.sqrt(bandwidth_value), n=1)[0]
             result.append(base_sample + noise)
 
