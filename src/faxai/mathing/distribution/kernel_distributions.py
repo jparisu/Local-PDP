@@ -11,7 +11,9 @@ class KernelDensityDistribution(Distribution):
     Represents a distribution given by a kernel function.
     """
 
-    def __init__(self, kernel: Kernel): ...
+    def __init__(self, kernel: Kernel):
+        # TODO
+        raise NotImplementedError
 
 
 class KernelDensityEstimationDistribution(Distribution):
@@ -19,4 +21,6 @@ class KernelDensityEstimationDistribution(Distribution):
     Represents a distribution estimated from a sample using Kernel Density Estimation (KDE).
     """
 
-    def __init__(self, samples: np.ndarray, kernel: Kernel): ...
+    def __init__(self, samples: np.ndarray, kernel: Kernel):
+        # TODO
+        raise NotImplementedError

@@ -10,7 +10,9 @@ class DeltaDistribution(Distribution):
     Represents a degenerate distribution concentrated only on those points that are given as samples.
     """
 
-    def __init__(self, samples: np.ndarray): ...
+    def __init__(self, samples: np.ndarray):
+        # TODO
+        raise NotImplementedError
 
 
 class HistogramDistribution(Distribution):
@@ -19,7 +21,9 @@ class HistogramDistribution(Distribution):
     Probability functions are set using histogram estimation.
     """
 
-    def __init__(self, samples: np.ndarray, bins: int | None = 10, bins_range: float | None = None): ...
+    def __init__(self, samples: np.ndarray, bins: int | None = 10, bins_range: float | None = None):
+        # TODO
+        raise NotImplementedError
 
 
 class WeightedDistribution(Distribution):
@@ -30,4 +34,6 @@ class WeightedDistribution(Distribution):
 
     def __init__(
         self, samples: np.ndarray, weights: np.ndarray, bins: int | None = 10, bins_range: float | None = None
-    ): ...
+    ):
+        # TODO
+        raise NotImplementedError

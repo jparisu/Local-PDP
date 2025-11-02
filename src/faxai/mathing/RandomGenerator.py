@@ -146,8 +146,8 @@ class RandomGenerator:
         Generate samples from a uniform distribution over ``[a, b)``.
 
         Args:
-            a: Lower bound of the uniform distribution (inclusive).
-            b: Upper bound of the uniform distribution (exclusive).
+            low: Lower bound of the uniform distribution (inclusive).
+            high: Upper bound of the uniform distribution (exclusive).
             n: Number of samples to generate.
 
         Returns:

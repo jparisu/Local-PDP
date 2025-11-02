@@ -108,7 +108,7 @@ class NormalDistribution(Distribution):
     # Probability Functions
 
     @cache_method
-    def pdf(self, x: np.ndarray[float]) -> np.ndarray[float]:
+    def pdf(self, x: np.ndarray) -> np.ndarray:
         """
         Compute the probability density function (PDF) at a given value.
 
@@ -125,7 +125,7 @@ class NormalDistribution(Distribution):
         return norm.pdf(x, loc=self._mean, scale=self._std)
 
     @cache_method
-    def cdf(self, x: np.ndarray[float]) -> np.ndarray[float]:
+    def cdf(self, x: np.ndarray) -> np.ndarray:
         """
         Compute the cumulative distribution function (CDF) at a given value.
 
@@ -156,7 +156,7 @@ class NormalDistribution(Distribution):
     ############################
     # Sampling Methods
 
-    def random_sample(self, n: int = 1, rng: RandomGenerator | None = None) -> np.ndarray[float]:
+    def random_sample(self, n: int = 1, rng: RandomGenerator | None = None) -> np.ndarray:
         """
         Generate random samples from the normal distribution.
 
@@ -265,7 +265,7 @@ class UniformDistribution(Distribution):
     ############################
     # Probability Functions
 
-    def pdf(self, x: np.ndarray[float]) -> np.ndarray[float]:
+    def pdf(self, x: np.ndarray) -> np.ndarray:
         """
         Compute the probability density function (PDF) at a given value.
 
@@ -281,7 +281,7 @@ class UniformDistribution(Distribution):
         """
         return np.where((x < self._low) | (x > self._high), 0.0, 1.0 / (self._high - self._low))
 
-    def cdf(self, x: np.ndarray[float]) -> np.ndarray[float]:
+    def cdf(self, x: np.ndarray) -> np.ndarray:
         """
         Compute the cumulative distribution function (CDF) at a given value.
 
@@ -319,7 +319,7 @@ class UniformDistribution(Distribution):
     ############################
     # Sampling Methods
 
-    def random_sample(self, n: int = 1, rng: RandomGenerator | None = None) -> np.ndarray[float]:
+    def random_sample(self, n: int = 1, rng: RandomGenerator | None = None) -> np.ndarray:
         """
         Generate random samples from the uniform distribution.
 

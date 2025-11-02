@@ -1,4 +1,3 @@
-import pytest
 
 import faxai.utils.typing as my_module
 
@@ -13,6 +12,9 @@ class A_Unhashable:
 class A_Hashable:
     def __init__(self, x=42):
         self.x = x
+
+    def __eq__(self, other):
+        return self.x == other.x
 
     def __hash__(self):
         return hash(self.x)

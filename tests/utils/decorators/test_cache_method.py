@@ -1,4 +1,3 @@
-import pytest
 
 from faxai.utils.decorators import cache_method
 
