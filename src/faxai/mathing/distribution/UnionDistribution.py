@@ -168,7 +168,7 @@ class UnionDistribution(Distribution):
     # Probability Functions
 
     @cache_method
-    def pdf(self, x: np.ndarray[float]) -> np.ndarray[float]:
+    def pdf(self, x: np.ndarray) -> np.ndarray:
         """
         Compute the mixture probability density function (PDF) at `x`.
 
@@ -182,10 +182,11 @@ class UnionDistribution(Distribution):
         float
             The mixture PDF value at `x`, i.e., the average of component PDFs.
         """
-        return np.mean([d.pdf(x) for d in self._distributions], axis=0)
+        arr = np.array([d.pdf(x) for d in self._distributions])
+        return np.mean(arr, axis=0)
 
     @cache_method
-    def cdf(self, x: np.ndarray[float]) -> np.ndarray[float]:
+    def cdf(self, x: np.ndarray) -> np.ndarray:
         """
         Compute the mixture cumulative distribution function (CDF) at `x`, when
         available.
@@ -201,7 +202,8 @@ class UnionDistribution(Distribution):
             The mixture CDF value at `x` if all components define `cdf(x)`.
             Otherwise, a deterministic Monte-Carlo approximation is returned.
         """
-        return np.mean([d.cdf(x) for d in self._distributions], axis=0)
+        arr = np.array([d.cdf(x) for d in self._distributions])
+        return np.mean(arr, axis=0)
 
     @cache_method
     def maximum_pdf(self) -> float:
@@ -214,7 +216,7 @@ class UnionDistribution(Distribution):
     ############################
     # Sampling Methods
 
-    def random_sample(self, n: int = 1, rng: RandomGenerator | None = None) -> np.ndarray[float]:
+    def random_sample(self, n: int = 1, rng: RandomGenerator | None = None) -> np.ndarray:
         """
         Generate random samples from the mixture distribution.
 

@@ -29,7 +29,6 @@ dependencies = [
     "matplotlib>=3.0.0",
     "plotly>=5.0.0",
     "scipy>=1.0.0",
-    "scipy-stubs>=1.0.0",
 ]
 
 [project.optional-dependencies]
