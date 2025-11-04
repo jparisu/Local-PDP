@@ -38,6 +38,9 @@ nav:
   - Home: index.md
   - Installation: installation.md
   - Getting Started: getting-started.md
+  - Explainability Methods:
+    - ICE (Individual Conditional Expectation): ice.md
+    - PDP (Partial Dependence Plot): pdp.md
 
 extra:
   social:
