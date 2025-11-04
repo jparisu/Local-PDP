@@ -12,13 +12,12 @@ import logging
 import weakref
 
 from faxai.utils.decorators import cache_method
-from faxai.explaining.configuration.Configuration import Configuration
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
-class DataCore(Configuration):
+class DataCore:
     """
     Core configuration class for explanation generation.
 

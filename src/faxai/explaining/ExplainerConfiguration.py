@@ -11,15 +11,14 @@ import logging
 
 from faxai.utils.decorators import cache_method
 from faxai.mathing.kernel import Kernel, create_default_kernel
-from faxai.explaining.configuration.Configuration import Configuration
-from faxai.explaining.configuration.DataCore import DataCore
+from faxai.explaining.DataCore import DataCore
 from faxai.data.DataHolder import Grid
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
-class ExplainerConfiguration(Configuration):
+class ExplainerConfiguration:
     """
     Configuration class for explanation generation.
 
@@ -284,7 +283,10 @@ class ExplainerConfiguration(Configuration):
         ]
 
 
-    def valid(self, throw: bool = True) -> bool:
+    ############################################################
+    # Check functions and utilities
+
+    def check(self, throw: bool = True) -> bool:
         """
         Validate the configuration parameters.
 
@@ -313,5 +315,41 @@ class ExplainerConfiguration(Configuration):
                     if throw:
                         raise ValueError(f"Study feature '{feature}' is not in the core configuration features.")
                     return False
+
+        return True
+
+    def check_kernel(self, throw: bool = True) -> bool:
+        """
+        Validate the kernel configuration.
+
+        Args:
+            throw (bool): If True, raise an exception if the kernel configuration is invalid.
+
+        Returns:
+            bool: True if the kernel configuration is valid, False otherwise.
+        """
+
+        if self.kernel is None:
+            if throw:
+                raise ValueError("Kernel configuration is not set.")
+            return False
+
+        return True
+
+    def check_locality_ranges(self, throw: bool = True) -> bool:
+        """
+        Validate the locality ranges configuration.
+
+        Args:
+            throw (bool): If True, raise an exception if the locality ranges configuration is invalid.
+
+        Returns:
+            bool: True if the locality ranges configuration is valid, False otherwise.
+        """
+
+        if self.locality_ranges is None:
+            if throw:
+                raise ValueError("Locality ranges configuration is not set.")
+            return False
 
         return True

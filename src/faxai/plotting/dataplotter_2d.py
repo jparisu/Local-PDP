@@ -1,12 +1,12 @@
-
 from __future__ import annotations
+
 import matplotlib.pyplot as plt
-import plotly.graph_objects as go
 import numpy as np
+import plotly.graph_objects as go
 from matplotlib.collections import LineCollection
 
-from faxai.plotting.DataPlotter import DataPlotter
 from faxai.data.DataHolder import DataHolder
+from faxai.plotting.DataPlotter import DataPlotter
 
 
 class DP_Line(DataPlotter):
@@ -29,8 +29,6 @@ class DP_Line(DataPlotter):
         fig.add_trace(go.Scatter(x=self.x, y=self.y, **trace_kwargs))
 
 
-
-
 class DP_Scatter(DataPlotter):
     """
     Data Plotter for Scatter Plots
@@ -49,7 +47,6 @@ class DP_Scatter(DataPlotter):
         default = {"mode": "markers"}
         trace_kwargs = {**default, **self.params}
         fig.add_trace(go.Scatter(x=self.x, y=self.y, **trace_kwargs))
-
 
 
 class DP_Area(DataPlotter):
@@ -80,7 +77,7 @@ class DP_Histogram(DataPlotter):
         self.max_height = max_height
 
         if bins is not None:
-            self.params['bins'] = bins
+            self.params["bins"] = bins
 
     def matplotlib_plot(self, ax: plt.axes) -> None:
         n, bins, patches = ax.hist(self.x, **self.params)
@@ -89,7 +86,6 @@ class DP_Histogram(DataPlotter):
         max_height = max(n)
         for patch in patches:
             patch.set_height(patch.get_height() / max_height)
-
 
 
 class DP_VerticalLine(DataPlotter):
@@ -120,7 +116,6 @@ class DP_LineCollection(DataPlotter):
         ax.add_collection(LineCollection(self.segments, **self.params))
 
 
-
 class DP_Collection(DataPlotter):
     """
     Data Plotter for Collection Plots
@@ -138,9 +133,7 @@ class DP_Collection(DataPlotter):
         for item in self.data:
             item.matplotlib_plot(ax)
 
-    def from_dataholder(
-            cls,
-            dataholder: DataHolder, params: dict = None, axis: int = 0) -> DP_Collection:
+    def from_dataholder(cls, dataholder: DataHolder, params: dict = None, axis: int = 0) -> DP_Collection:
         """
         Create a DP_Collection from a DataHolder.
 
@@ -160,14 +153,7 @@ class DP_Collection(DataPlotter):
 
         for i in range(dataholder.shape()[1]):
             y = dataholder.get_column(i)
-            plotter.add(
-                DP_Line(
-                    x=dataholder.get_column(0),
-                    y=y,
-                    params=params,
-                    axis=axis
-                )
-            )
+            plotter.add(DP_Line(x=dataholder.get_column(0), y=y, params=params, axis=axis))
 
         return plotter
 

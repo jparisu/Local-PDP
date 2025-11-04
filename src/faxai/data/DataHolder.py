@@ -1,12 +1,11 @@
-
 from __future__ import annotations
 
-import pandas as pd
-import numpy as np
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import Iterator
 
-from faxai.utils.decorators import cache_method
+import numpy as np
+
 
 class DataHolder(ABC):
     """
@@ -28,7 +27,6 @@ class DataHolder(ABC):
         """
         return True
 
-
     @abstractmethod
     def shape(self) -> tuple[int, ...]:
         """
@@ -37,7 +35,6 @@ class DataHolder(ABC):
             tuple[int, ...]: Shape of the data.
         """
         pass
-
 
 @dataclass
 class Grid(DataHolder):
@@ -81,6 +78,16 @@ class Grid(DataHolder):
         return tuple(int(self.grid[i].shape[0]) for i in range(len(self.grid)))
 
 
+    def __getitem__(self, index: int) -> np.ndarray:
+        """
+        Get the dimension at the specified index.
+        Args:
+            index (int): Index of the dimension to retrieve.
+        Returns:
+            np.ndarray: The dimension at the specified index.
+        """
+        return self.grid[index]
+
 @dataclass
 class HyperPlane(DataHolder):
     """
@@ -110,11 +117,11 @@ class HyperPlanes(DataHolder):
 
     Attributes:
         grid (Grid): N dimensional base data with shape A1 x A2 x ... x AN.
-        target (np.ndarray): matrix with shape (A1, A2, ..., AN) representing the target values for each point in the grid.
+        targets (np.ndarray): matrix with shape (M, A1, A2, ..., AN) representing the target values for each point in the grid.
     """
 
     grid: Grid
-    target: np.ndarray
+    targets: np.ndarray
 
     def shape(self) -> tuple[int, ...]:
         """
@@ -122,4 +129,24 @@ class HyperPlanes(DataHolder):
         Returns:
             tuple[int, ...]: Shape of the hyperplane.
         """
-        return self.target.shape
+        return self.targets.shape
+
+    def __len__(self) -> int:
+        """
+        Get the number of hyperplanes.
+        Returns:
+            int: Number of hyperplanes.
+        """
+        return self.targets.shape[0]
+
+    def it_hyperplanes(self) -> Iterator[HyperPlane]:
+        """
+        Get the list of hyperplanes.
+        Returns:
+            list[HyperPlane]: List of hyperplanes.
+        """
+        for i in range(len(self)):
+            yield HyperPlane(
+                grid=self.grid,
+                target=self.targets[i, :],
+            )

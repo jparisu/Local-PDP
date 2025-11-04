@@ -6,114 +6,19 @@ from __future__ import annotations
 from typing import Any, Callable
 import logging
 from dataclasses import dataclass
+import pandas as pd
 
-from faxai.explaining.configuration.DataCore import DataCore
-from faxai.explaining.configuration.ExplainerConfiguration import ExplainerConfiguration
-from faxai.explaining.ExplanationTechnique import ExplanationTechnique
+from faxai.explaining.DataCore import DataCore
+from faxai.explaining.ExplainerContext import ExplainerContext
+from faxai.explaining.ExplainerConfiguration import ExplainerConfiguration
 from faxai.data.DataHolder import DataHolder
+from faxai.data.DataPlotter import DataPlotter
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_CONFIGURATION_NAME = "__default__"
 
-# Typing alias
-ExplanationTechniqueCtor = Callable[..., ExplanationTechnique]
-
-
-class ExplainerContainer:
-    """
-    Helper function to cache multiple explainers and their configurations.
-    """
-
-    configurations : dict[str, ExplainerConfiguration] = {}
-    explainers : dict[str, dict[str, ExplanationTechnique]] = {}
-
-    def add_configuration_and_technique(
-            self,
-            configuration_name: str,
-            technique_name: str,
-            configuration: ExplainerConfiguration,
-            explainer: ExplanationTechnique
-    ) -> None:
-        """
-        Add an explainer with its configuration to the container.
-
-        Args:
-            configuration_name (str): Name of the configuration.
-            technique_name (str): Name of the explanation technique.
-            configuration (ExplainerConfiguration): The explanation configuration instance.
-            explainer (ExplanationTechnique): The explanation technique instance.
-        """
-        self.configurations[configuration_name] = configuration
-        if configuration_name not in self.explainers:
-            self.explainers[configuration_name] = {}
-        self.explainers[configuration_name][technique_name] = explainer
-
-    def add_technique(
-            self,
-            configuration_name: str,
-            technique_name: str,
-            explainer: ExplanationTechnique,
-    ) -> None:
-        """
-        Add an explainer technique to the container without configuration.
-
-        Args:
-            technique_name (str): Name of the explanation technique.
-            explainer (ExplanationTechnique): The explanation technique instance.
-        """
-        if configuration_name not in self.explainers:
-            self.explainers[configuration_name] = {}
-        self.explainers[configuration_name][technique_name] = explainer
-
-    def get_technique(
-            self,
-            configuration_name: str,
-            technique_name: str
-    ) -> ExplanationTechnique | None:
-        """
-        Get an explainer by its configuration and technique names.
-
-        Args:
-            configuration_name (str): Name of the configuration.
-            technique_name (str): Name of the explanation technique.
-
-        Returns:
-            ExplanationTechnique | None: The explanation technique instance if found, else None.
-        """
-        return self.explainers.get(configuration_name, {}).get(technique_name, None)
-
-    def add_configuration(
-            self,
-            name: str,
-            configuration: ExplainerConfiguration
-    ) -> None:
-        """
-        Add an explanation configuration to the container.
-
-        Args:
-            name (str): Name of the configuration.
-            configuration (ExplainerConfiguration): The explanation configuration instance.
-        """
-        self.configurations[name] = configuration
-
-    def get_configuration(
-            self,
-            name: str
-    ) -> ExplainerConfiguration | None:
-        """
-        Get an explanation configuration by its name.
-
-        Args:
-            name (str): Name of the configuration.
-
-        Returns:
-            ExplainerConfiguration | None: The explanation configuration instance if found, else None.
-        """
-        return self.configurations.get(name, None)
-
-
-class ExplainerCore(ExplainerContainer):
+class ExplainerCore:
     """
     Core class for data holding and efficient processing in Explainer module.
 
@@ -124,7 +29,10 @@ class ExplainerCore(ExplainerContainer):
 
     def __init__(
         self,
-        datacore: DataCore
+        dataframe_X: pd.DataFrame | None = None,
+        model: Any | None = None,
+        datacore: DataCore | None = None,
+        configurations: dict[str, ExplainerConfiguration] | None = None,
     ) -> None:
         """
         Initialize the ExplainerCore with dataframe and model.
@@ -135,11 +43,32 @@ class ExplainerCore(ExplainerContainer):
 
         Features are inferred from DataFrame columns.
         """
+
+        # Create DataCore if not provided
+        if datacore is None:
+            if dataframe_X is None or model is None:
+                raise ValueError("Either datacore or both dataframe_X and model must be provided.")
+
+            datacore = DataCore(
+                df_X=dataframe_X,
+                model=model,
+            )
+
         # Store Data Core - main configuration with data and model
         self._datacore = datacore
 
-        # Default parameters to create a configuration
-        self._default_configuration_params : dict[str, Any] = {"use_default": True}
+        # Create contexts
+        self._contexts = {}
+
+        if configurations is not None:
+            for name, config in configurations.items():
+                self._contexts[name] = ExplainerContext(
+                    datacore=self._datacore,
+                    configuration=config,
+                )
+
+        # Set default configuration params
+        self._default_configuration_params: dict[str, Any] = {}
 
 
     #####################
@@ -158,7 +87,7 @@ class ExplainerCore(ExplainerContainer):
         self._default_configuration_params = params
 
 
-    def get_default_configuration(
+    def __get_default_configuration(
             self,
             features: list[str] | None = None,
     ) -> ExplainerConfiguration:
@@ -177,8 +106,7 @@ class ExplainerCore(ExplainerContainer):
             features = features_params
 
         elif features and features_params and features != features_params:
-            raise ValueError("Default configuration already has study features set, cannot override.")
-
+            raise ValueError(f"Default configuration already has study features set {features_params}, cannot override.")
 
         return ExplainerConfiguration(
             datacore=self.datacore(),
@@ -187,8 +115,45 @@ class ExplainerCore(ExplainerContainer):
         )
 
 
+    def __new_configuration_id(self) -> str:
+        """
+        Generate a new unique configuration ID.
+
+        Returns:
+            str: The new configuration ID.
+        """
+        return "__config__" + str(len(self._contexts) + 1)
+
+
+    def add_configuration(
+            self,
+            name: str,
+            configuration: ExplainerConfiguration | None = None,
+            override: bool = True,
+    ) -> None:
+        """
+        Add an explanation configuration to the core.
+
+        Args:
+            configuration (ExplainerConfiguration): The explanation configuration instance.
+        """
+        if name in self._contexts and not override:
+            raise ValueError(f"Configuration '{name}' already exists in core.")
+
+        if configuration is None:
+            configuration = self.__get_default_configuration()
+
+        # Check configuration is valid
+        configuration.check(throw=True)
+
+        self._contexts[name] = ExplainerContext(
+            datacore=self._datacore,
+            configuration=configuration,
+        )
+
+
     #####################
-    # Getter
+    # Getters
 
     def datacore(self) -> DataCore:
         """
@@ -206,8 +171,9 @@ class ExplainerCore(ExplainerContainer):
 
     def explain(
             self,
-            technique: ExplanationTechniqueCtor | str,
-            configuration: str | list[str] | ExplainerConfiguration,
+            technique: str,
+            configuration: str | list[str] | ExplainerConfiguration | None,
+            **kwargs,
     ) -> DataHolder:
 
         """
@@ -221,40 +187,40 @@ class ExplainerCore(ExplainerContainer):
             Any: The generated explanations.
         """
         # Get actual configuration
-        conf_name, configuration = self.__get_configuration(configuration)
-
-        # Get actual technique
-        tech_name, technique = self.__get_technique(technique)
-
-        # Check if the explainer is already cached
-        if conf_name != "" and tech_name != "":
-            cached_explainer = self.get_technique(conf_name, tech_name)
-            if cached_explainer is not None:
-                logger.debug(f"Using cached explainer for technique '{tech_name}' and configuration '{conf_name}'.")
-                return cached_explainer.explain(configuration, self)
-
-        # Create the explainer
-        explainer = technique(configuration)
-
-        # Store the explanation in cache
-        if conf_name != "" and tech_name != "":
-            self.add_configuration_and_technique(
-                conf_name,
-                tech_name,
-                configuration,
-                explainer
-            )
+        configuration_name = self.__resolve_configuration_name(configuration)
 
         # Generate explanations
-        explanations = explainer.explain(configuration, self)
-
-        return explanations
+        return self._contexts[configuration_name].explain(technique, **kwargs)
 
 
-    def __get_configuration(
+    def plot(
+            self,
+            technique: str,
+            configuration: str | list[str] | ExplainerConfiguration | None,
+            **kwargs,
+    ) -> DataPlotter:
+
+        """
+        Generate explanations using the specified technique and configuration.
+
+        Args:
+            technique (ExplanationTechnique): The explanation technique to use.
+            configuration_name (str): The name of the configuration to use.
+
+        Returns:
+            Any: The generated explanations.
+        """
+        # Get actual configuration
+        configuration_name = self.__resolve_configuration_name(configuration)
+
+        # Generate explanations
+        return self._contexts[configuration_name].plot(technique, **kwargs)
+
+
+    def __resolve_configuration_name(
             self,
             configuration: str | list[str] | ExplainerConfiguration | None,
-    ) -> tuple[str, ExplainerConfiguration]:
+    ) -> str:
         """
         To facilitate explainer configuration retrieval, the method accepts multiple input types:
 
@@ -270,17 +236,18 @@ class ExplainerCore(ExplainerContainer):
 
         # Case 1
         if isinstance(configuration, ExplainerConfiguration):
-            return "", configuration
+            id = self.__new_configuration_id()
+            self.add_configuration(id, configuration)
+            return id
 
         # Case 2
         if configuration is None:
-            return DEFAULT_CONFIGURATION_NAME, self.get_default_configuration()
+            return DEFAULT_CONFIGURATION_NAME
 
         # Case 3
         if isinstance(configuration, str):
-            config = self.get_configuration(configuration)
-            if config is not None:
-                return configuration, config
+            if configuration in self._contexts:
+                return configuration
 
             # If not found, it may be a feature name
             if configuration in self.datacore().features():
@@ -291,36 +258,22 @@ class ExplainerCore(ExplainerContainer):
 
         # Case 4
         if isinstance(configuration, list):
-            config = self.get_default_configuration(features=configuration)
+
+            # Feature list provided
             name = ','.join(configuration)
+            # Check if the configuration already exists
+            if name in self._contexts:
+                return name
+
+            # Create default configuration
+            config = self.__get_default_configuration(features=configuration)
             self.add_configuration(name, config)
-            return name, config
+            return name
 
         # Error, non configuration found
-        raise ValueError(f"Incorrect configuration.")
-
-
-
-    def __get_technique(
-            self,
-            technique: ExplanationTechniqueCtor | str,
-    ) -> tuple[str, ExplanationTechniqueCtor]:
-        """
-        To facilitate explainer technique retrieval, the method accepts multiple input types:
-
-        1. ExplanationTechnique: already the technique instance.
-        2. str: the name of a technique to create a new instance.
-
-        In case 1, the technique will not be stored in the core.
-        In case 2, a new technique will be created.
-        """
-
-        # Case 1
-        # if isinstance(technique, ExplanationTechniqueCtor):
-            # Use class name as technique name
-
-        return technique.__class__.__name__, technique
-        # TODO
+        raise ValueError(
+            f"Incorrect configuration. Set the name of a stored configuration, or the name of a feature or features"
+            +"to study with default configuration.")
 
     ####################
     #       PLOT       #
