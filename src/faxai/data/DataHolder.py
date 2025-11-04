@@ -81,7 +81,6 @@ class Grid(DataHolder):
         return tuple(int(self.grid[i].shape[0]) for i in range(len(self.grid)))
 
 
-
 @dataclass
 class HyperPlane(DataHolder):
     """
@@ -95,6 +94,27 @@ class HyperPlane(DataHolder):
     grid: Grid
     target: np.ndarray
 
+    def shape(self) -> tuple[int, ...]:
+        """
+        Get the shape of the hyperplane.
+        Returns:
+            tuple[int, ...]: Shape of the hyperplane.
+        """
+        return self.target.shape
+
+
+@dataclass
+class HyperPlanes(DataHolder):
+    """
+    A data class representing a N dimensional grid and M target dimensions with a value for each point in the grid.
+
+    Attributes:
+        grid (Grid): N dimensional base data with shape A1 x A2 x ... x AN.
+        target (np.ndarray): matrix with shape (A1, A2, ..., AN) representing the target values for each point in the grid.
+    """
+
+    grid: Grid
+    target: np.ndarray
 
     def shape(self) -> tuple[int, ...]:
         """

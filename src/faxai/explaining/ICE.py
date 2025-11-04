@@ -14,6 +14,7 @@ from faxai.explaining.ExplainerCore import ExplainerCore
 from faxai.explaining.configuration.DataCore import DataCore
 from faxai.explaining.configuration.ExplainerConfiguration import ExplainerConfiguration
 from faxai.explaining.ExplanationTechnique import ExplanationTechnique
+from faxai.plotting.DataPlotter import DataPlotter
 
 logger = logging.getLogger(__name__)
 
@@ -90,3 +91,24 @@ class ICE(ExplanationTechnique):
             return False
 
         return True
+
+
+    def plot_ice(self, params: dict = None) -> DataPlotter:
+        """
+        Plot the ICE values.
+
+        Args:
+            params (dict): Parameters for the plot.
+
+        Returns:
+            DataPlotter: The plotter object.
+        """
+        params = dict(params) if params else {}
+
+        params.setdefault('color', 'paleturquoise')
+        params.setdefault('label', 'ICE')
+        params.setdefault('linewidth', 1)
+        params.setdefault('alpha', 0.2)
+
+        hyperplane = self.explain()
+        return hyperplane.plot(params=params)
