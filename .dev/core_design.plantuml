@@ -1,0 +1,83 @@
+@startuml
+
+package Kernel_pkg {
+    class Bandwidth {
+    }
+
+    class Kernel {
+        + bandwidth : Bandwidth
+    }
+
+    Kernel *-- "1" Bandwidth
+}
+
+package Data {
+    struct DataHolder {
+        + shape() : Tuple<Int, ...>
+    }
+
+    class DataPlotter {
+        + plot_matplotlib()
+        + plot_plotly()
+    }
+}
+
+package Core {
+
+    struct DataCore {
+        + model
+        + dataframe
+    }
+
+    struct ExplainerConfiguration {
+        + datacore : DataCore
+        + study_features : List<String>
+        + feature_limits : Map<String, Tuple<Float, Float>>
+        + feature_values : Map<String, List<Float>>
+        + marginal_locality : List<Float>
+        + kernel : Kernel
+    }
+    ExplainerConfiguration o-- "1" Kernel
+    ExplainerConfiguration o-- "1" DataCore
+
+    class ExplainerContext {
+        + datacore : DataCore
+        + configuration : ExplainerConfiguration
+        + explanations : Map<String, Explainer>
+        + explain(name : string) : DataHolder
+    }
+    ExplainerContext *-- "1" ExplainerConfiguration
+    ExplainerContext o-- "1" DataCore
+    ExplainerContext *-- "N" Explainer
+
+    abstract Explainer {
+        + name : String
+    }
+    Explainer ..> ExplainerContext : "uses"
+
+    abstract DataExplainer {
+        + explain(context : ExplainerContext) : DataHolder
+    }
+    DataExplainer --|> Explainer
+    DataExplainer ..> DataHolder : "produces"
+    abstract PlotExplainer {
+        + plot(context : ExplainerContext) : DataPlotter
+    }
+    PlotExplainer ..> DataPlotter : "produces"
+    PlotExplainer --|> Explainer
+
+    class ExplainerFactory {
+        + create_explainer(technique : String) : Explainer
+    }
+    ExplainerFactory ..> Explainer : "creates"
+    ExplainerFactory <.. ExplainerContext : "needs"
+
+    class ExplainerCore {
+        + datacore : DataCore
+        + configurations : Map<String, ExplainerContext>
+        + explain(configuration : String, technique : String) : DataHolder
+    }
+    ExplainerCore *-- "1" DataCore
+    ExplainerCore *-- "N" ExplainerContext
+
+}
