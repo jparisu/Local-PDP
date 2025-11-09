@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING
-import numpy as np
 
 from faxai.data.DataHolder import HyperPlane, HyperPlanes
 from faxai.data.DataPlotter import DataPlotter
@@ -36,7 +35,6 @@ class L_PDP(CacheExplainerData, ExplainerPlot):
 
         return valid
 
-
     def _explain(
         self,
         datacore: DataCore,
@@ -54,7 +52,6 @@ class L_PDP(CacheExplainerData, ExplainerPlot):
 
         # Get the normalization weight
         kernel_normalizer: HyperPlane = context.explain("kernel-normalizer")
-
 
         # Get the predictions by averaging ICE values with weights across all instances
         weithted = values * weights

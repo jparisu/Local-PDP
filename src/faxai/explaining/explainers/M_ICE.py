@@ -5,12 +5,13 @@ This class holds the data and methods for generating ICE distributions and plots
 
 from __future__ import annotations
 
+import itertools
 import logging
 from typing import TYPE_CHECKING
-import numpy as np
-import itertools
 
-from faxai.data.DataHolder import DataHolderCollection, HyperPlanes, HyperPlane
+import numpy as np
+
+from faxai.data.DataHolder import DataHolderCollection, HyperPlanes
 from faxai.data.DataPlotter import DataPlotter
 from faxai.data.holder_to_plotter import from_collection_to_lines
 from faxai.explaining.DataCore import DataCore
@@ -45,14 +46,12 @@ class M_ICE(CacheExplainerData, ExplainerPlot):
 
         return valid
 
-
     def _explain(
         self,
         datacore: DataCore,
         configuration: ExplainerConfiguration,
         context: ExplainerContext,
     ) -> DataHolderCollection:
-
         logger.debug("m-ICE explanation generation")
 
         # Get the ICE values
@@ -80,12 +79,8 @@ class M_ICE(CacheExplainerData, ExplainerPlot):
 
         # For each locality combination
         for locality in localities:
-
             # Create a dictionary for the current locality
-            current_locality = {
-                features[j]: locality[j]
-                for j in range(len(features))
-            }
+            current_locality = {features[j]: locality[j] for j in range(len(features))}
 
             # Get the indexes of the instances inside the locality
             instances_indexes = []
@@ -141,9 +136,7 @@ class M_ICE(CacheExplainerData, ExplainerPlot):
                 )
             )
 
-
         return holder
-
 
     # Generate one line per instance
     # def _explain(
@@ -220,7 +213,6 @@ class M_ICE(CacheExplainerData, ExplainerPlot):
     #     # For each hyperplane, get only those values where grid is within locality ranges
 
     #     return holder
-
 
     def plot(self, context: ExplainerContext, params: dict = None) -> DataPlotter:
         """

@@ -24,7 +24,6 @@ logger = logging.getLogger(__name__)
 
 
 class ICE(CacheExplainerData, ExplainerPlot):
-
     def check_configuration(cls, configuration: ExplainerConfiguration, throw: bool = True) -> bool:
         """
         Check if the provided configuration is valid for this explanation technique.
@@ -72,7 +71,6 @@ class ICE(CacheExplainerData, ExplainerPlot):
 
         return HyperPlanes(grid=grid, targets=reshaped_predictions)
 
-
     def plot(self, context: ExplainerContext, params: dict = None) -> DataPlotter:
         """
         Plot the ICE values.
@@ -99,7 +97,6 @@ class ICE(CacheExplainerData, ExplainerPlot):
 
 
 class ICE_Scatter(ExplainerPlot):
-
     def plot(self, context: ExplainerContext, params: dict = None) -> DataPlotter:
         """
         Plot the ICE scatter values.

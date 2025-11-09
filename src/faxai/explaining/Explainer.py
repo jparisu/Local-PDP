@@ -42,7 +42,6 @@ class Explainer(ABC):
         """
         return configuration.check(throw=throw)
 
-
     @classmethod
     def name(cls) -> str:
         """

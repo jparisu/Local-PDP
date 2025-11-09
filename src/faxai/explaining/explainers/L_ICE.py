@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from faxai.data.DataHolder import WeightedHyperPlanes, HyperPlanes
+from faxai.data.DataHolder import HyperPlanes, WeightedHyperPlanes
 from faxai.data.DataPlotter import DataPlotter
 from faxai.data.holder_to_plotter import from_hyperplanes_to_lines
 from faxai.explaining.DataCore import DataCore
@@ -24,7 +24,6 @@ logger = logging.getLogger(__name__)
 
 
 class L_ICE(CacheExplainerData, ExplainerPlot):
-
     def check_configuration(cls, configuration: ExplainerConfiguration, throw: bool = True) -> bool:
         valid = True
 
@@ -36,7 +35,6 @@ class L_ICE(CacheExplainerData, ExplainerPlot):
 
         return valid
 
-
     def _explain(
         self,
         datacore: DataCore,
@@ -46,10 +44,10 @@ class L_ICE(CacheExplainerData, ExplainerPlot):
         logger.debug("l-ICE explanation generation")
 
         # Get the ICE information
-        ice : HyperPlanes = context.explain("ice")
+        ice: HyperPlanes = context.explain("ice")
 
         # For each point in the target, calculate the kernel weights
-        kernel_values : HyperPlanes = context.explain("kernel-values")
+        kernel_values: HyperPlanes = context.explain("kernel-values")
 
         # Create the weighted hyperplanes
         return WeightedHyperPlanes(
@@ -57,8 +55,6 @@ class L_ICE(CacheExplainerData, ExplainerPlot):
             targets=ice.targets,
             weights=kernel_values.targets,
         )
-
-
 
     def plot(self, context: ExplainerContext, params: dict = None) -> DataPlotter:
         """

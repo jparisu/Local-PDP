@@ -44,8 +44,7 @@ class ExplainerContext:
 
         # Apply name convention to existing explainers
         self.explainers = {
-            ExplainerFactory.name_convention(name): explainer
-            for name, explainer in self.explainers.items()
+            ExplainerFactory.name_convention(name): explainer for name, explainer in self.explainers.items()
         }
 
     def __get_explainer_or_create(self, technique: str, forced_type: type[T]) -> T:
@@ -89,7 +88,6 @@ class ExplainerContext:
         explainer = self.__get_explainer_or_create(technique, forced_type=ExplainerData)
         explainer.check_configuration(self.configuration, throw=True)
         return explainer.explain(context=self, **kwargs)
-
 
     def plot(self, technique: str, **kwargs: Any) -> DataPlotter:
         """

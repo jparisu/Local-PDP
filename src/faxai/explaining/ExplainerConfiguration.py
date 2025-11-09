@@ -202,7 +202,6 @@ class ExplainerConfiguration:
 
         return locality_limits
 
-
     def defaul_kernel(self) -> Kernel:
         """
         Set default kernel for the explanation.
@@ -271,7 +270,7 @@ class ExplainerConfiguration:
 
             ranges = []
             for i in range(1, len(localities)):
-                range_min = localities[i-1]
+                range_min = localities[i - 1]
                 range_max = localities[i]
                 ranges.append((range_min, range_max))
 
@@ -359,7 +358,6 @@ class ExplainerConfiguration:
 
         return True
 
-
     def __str__(self) -> str:
         """
         String representation of the ExplainerConfiguration.
@@ -377,7 +375,6 @@ class ExplainerConfiguration:
             f"  kernel={self.kernel}\n"
             f")"
         )
-
 
     def to_univariate(self) -> UnivariateExplainerConfiguration:
         """
@@ -400,7 +397,6 @@ class ExplainerConfiguration:
 
 
 class UnivariateExplainerConfiguration(ExplainerConfiguration):
-
     """
     Configuration class for univariate explanation generation.
 

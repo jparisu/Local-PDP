@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any, Dict, Optional
+
 import numpy as np
 
 import faxai.data.DataHolder as dh
@@ -8,9 +9,9 @@ import faxai.data.DataPlotter as dp
 
 
 def to_lines(
-        data: dh.DataHolder,
-        params: Optional[Dict[str, Any]] = None,
-    ) -> dp.DP_Collection | dp.DP_Line:
+    data: dh.DataHolder,
+    params: Optional[Dict[str, Any]] = None,
+) -> dp.DP_Collection | dp.DP_Line:
     """
     Convert a DataHolder to a DP_Line DataPlotter.
     Currently supports only HyperPlane DataHolders.
@@ -31,10 +32,7 @@ def to_lines(
             params=params,
         )
     else:
-        raise ValueError(
-            f"DataHolder of type {type(data)} cannot be converted to lines, or it is not implemented."
-        )
-
+        raise ValueError(f"DataHolder of type {type(data)} cannot be converted to lines, or it is not implemented.")
 
 
 def from_hyperplane_to_line(
@@ -111,7 +109,6 @@ def from_collection_to_lines(
     plotter = dp.DP_Collection(params=params)
 
     for data_holder in collection:
-
         plotter.add(
             to_lines(
                 data=data_holder,

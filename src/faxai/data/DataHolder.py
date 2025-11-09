@@ -168,7 +168,6 @@ class DataHolderCollection(DataHolder):
 
         self.data_holders = data_holders
 
-
     def add(self, data_holder: DataHolder) -> None:
         """
         Add a data holder to the collection.
@@ -178,20 +177,17 @@ class DataHolderCollection(DataHolder):
         """
         self.data_holders.append(data_holder)
 
-
     def shape(self) -> tuple[int, ...]:
         """
         Get the shape of the data collection.
         """
         return (len(self.data_holders),)
 
-
     def __len__(self) -> int:
         """
         Get the number of data holders inside.
         """
         return len(self.data_holders)
-
 
     def __iter__(self) -> Iterator[DataHolder]:
         """
@@ -200,7 +196,6 @@ class DataHolderCollection(DataHolder):
             Iterator[DataHolder]: Iterator of data holders.
         """
         return iter(self.data_holders)
-
 
 
 @dataclass

@@ -6,14 +6,11 @@ from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING
-import numpy as np
-from itertools import product
 
-from faxai.data.DataPlotter import DP_Scatter, DP_Histogram
-from faxai.data.DataHolder import HyperPlanes, HyperPlane
-from faxai.data.holder_to_plotter import from_hyperplanes_to_lines
+import numpy as np
+
+from faxai.data.DataHolder import HyperPlane, HyperPlanes
 from faxai.explaining.DataCore import DataCore
-from faxai.explaining.Explainer import ExplainerPlot, ExplainerData
 from faxai.explaining.ExplainerConfiguration import ExplainerConfiguration
 from faxai.explaining.explainers.CacheExplainer import CacheExplainerData
 
@@ -40,19 +37,16 @@ class KernelValues(CacheExplainerData):
 
         return valid
 
-
     @classmethod
     def name(cls) -> str:
         return "kernel-values"
-
 
     def _explain(
         self,
         datacore: DataCore,
         configuration: ExplainerConfiguration,
         context: ExplainerContext,
-     ) -> HyperPlanes:
-
+    ) -> HyperPlanes:
         logger.debug("Calculating kernel values")
 
         kernel = configuration.kernel
@@ -63,7 +57,7 @@ class KernelValues(CacheExplainerData):
         instance_values = datacore.df_X[features].to_numpy()
 
         # Get ICE values
-        ice : HyperPlanes = context.explain("ice")
+        ice: HyperPlanes = context.explain("ice")
 
         # To store the kernel values
         k_values = np.zeros_like(ice.targets)
@@ -74,12 +68,13 @@ class KernelValues(CacheExplainerData):
         finished_indexing = False
 
         while not finished_indexing:
-
             # Get the current feature values from the indexer
             current_values = np.array([feature_values[features[i]][indexer[i]] for i in range(len(features))])
 
             logger.debug(f"Calculating kernel values for indexes {indexer}  with grid point: {current_values}")
-            logger.debug(f"Instance: {instance_values[0].shape}, Current Values: {current_values.shape}, Index: {(0,) + tuple(indexer)}")
+            logger.debug(
+                f"Instance: {instance_values[0].shape}, Current Values: {current_values.shape}, Index: {(0,) + tuple(indexer)}"
+            )
             logger.debug(f"Instance: {instance_values[0]}, Current Values: {current_values}")
 
             # Calculate the kernel values for every point in the data
@@ -101,11 +96,7 @@ class KernelValues(CacheExplainerData):
                     finished_indexing = True
                     break
 
-        return HyperPlanes(
-            grid=ice.grid,
-            targets=k_values
-        )
-
+        return HyperPlanes(grid=ice.grid, targets=k_values)
 
 
 class KernelNormalizer(CacheExplainerData):
@@ -124,23 +115,20 @@ class KernelNormalizer(CacheExplainerData):
 
         return valid
 
-
     @classmethod
     def name(cls) -> str:
         return "kernel-normalizer"
-
 
     def _explain(
         self,
         datacore: DataCore,
         configuration: ExplainerConfiguration,
         context: ExplainerContext,
-     ) -> HyperPlane:
-
+    ) -> HyperPlane:
         logger.debug("Calculating kernel normalizer")
 
         # Get the kernel values
-        kernel_values : HyperPlanes = context.explain("kernel-values")
+        kernel_values: HyperPlanes = context.explain("kernel-values")
 
         # Sum the kernel values across all instances
         grid = kernel_values.grid

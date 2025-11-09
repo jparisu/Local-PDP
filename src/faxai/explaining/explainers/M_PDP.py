@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from faxai.data.DataHolder import HyperPlane, HyperPlanes, DataHolderCollection
+from faxai.data.DataHolder import DataHolderCollection, HyperPlane, HyperPlanes
 from faxai.data.DataPlotter import DataPlotter
 from faxai.data.holder_to_plotter import from_collection_to_lines
 from faxai.explaining.DataCore import DataCore
@@ -46,7 +46,6 @@ class M_PDP(CacheExplainerData, ExplainerPlot):
         configuration: ExplainerConfiguration,
         context: ExplainerContext,
     ) -> HyperPlane:
-
         logger.debug("M-PDP explanation generation")
 
         # Get ICE values
@@ -57,7 +56,7 @@ class M_PDP(CacheExplainerData, ExplainerPlot):
 
         # For each Hyperplanes in mice, we need to average the targets
         for locality in mice:
-            locality : HyperPlanes
+            locality: HyperPlanes
 
             grid = locality.grid
             targets = locality.targets
@@ -72,7 +71,6 @@ class M_PDP(CacheExplainerData, ExplainerPlot):
             )
 
         return holder
-
 
     def plot(
         self,
