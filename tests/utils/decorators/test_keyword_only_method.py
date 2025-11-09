@@ -1,7 +1,7 @@
 import pytest
 import inspect
 
-from faxai.utils.decorators import keyword_only_method
+from faex.utils.decorators import keyword_only_method
 
 
 class A:

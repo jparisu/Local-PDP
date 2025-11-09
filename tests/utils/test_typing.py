@@ -1,5 +1,5 @@
 
-import faxai.utils.typing as my_module
+import faex.utils.typing as my_module
 
 class A_Unhashable:
     def __init__(self, x=42):

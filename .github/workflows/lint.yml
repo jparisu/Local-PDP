@@ -55,7 +55,7 @@ jobs:
 
     - name: Type check with mypy
       run: |
-        mypy src/faxai
+        mypy src/faex
 
 
   spell-checker:

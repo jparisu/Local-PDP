@@ -4,19 +4,19 @@ authors:
   - family-names: "Paris"
     given-names: "Javier"
     orcid: "https://orcid.org/0000-0001-6489-0530"
-title: "faxai"
+title: "faex"
 version: 0.1.0
 date-released: 2025-22-10
-url: "https://github.com/jparisu/faxai"
-repository-code: "https://github.com/jparisu/faxai"
+url: "https://github.com/jparisu/faex"
+repository-code: "https://github.com/jparisu/faex"
 keywords:
   - machine-learning
   - explainability
   - feature-attribution
   - pdp
   - local-pdp
-  - faxai
+  - faex
   - AI
   - xai
 license: Apache-2.0
-abstract: "faxai is a Python library for machine learning explainability using feature attribution model-agnostic techniques."
+abstract: "faex is a Python library for machine learning explainability using feature attribution model-agnostic techniques."

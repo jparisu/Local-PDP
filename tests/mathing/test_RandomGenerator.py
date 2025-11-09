@@ -3,7 +3,7 @@ import random
 import pytest
 
 # Adjust this import to wherever RandomGenerator lives.
-from faxai.mathing.RandomGenerator import RandomGenerator
+from faex.mathing.RandomGenerator import RandomGenerator
 
 
 @pytest.mark.parametrize("seed", [0, 1, 42, 9999])

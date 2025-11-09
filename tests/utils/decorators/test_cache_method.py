@@ -1,5 +1,5 @@
 
-from faxai.utils.decorators import cache_method
+from faex.utils.decorators import cache_method
 
 
 class A:

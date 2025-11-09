@@ -1,20 +1,20 @@
 # Getting Started
 
-This guide will help you get started with `faxai`.
+This guide will help you get started with `faex`.
 
 ## Installation
 
 ### From PyPI
 
 ```bash
-pip install faxai
+pip install faex
 ```
 
 ### From Source
 
 ```bash
-git clone https://github.com/jparisu/faxai.git
-cd faxai
+git clone https://github.com/jparisu/faex.git
+cd faex
 pip install -e .
 ```
 

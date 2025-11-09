@@ -1,5 +1,5 @@
 """
-Pytest configuration file for faxai tests.
+Pytest configuration file for faex tests.
 """
 
 import sys

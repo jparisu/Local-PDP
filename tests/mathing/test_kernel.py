@@ -8,8 +8,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from faxai.mathing.bandwidth import Bandwidth
-from faxai.mathing.kernel import (
+from faex.mathing.bandwidth import Bandwidth
+from faex.mathing.kernel import (
     DeltaKernel,
     EpanechnikovKernel,
     GaussianKernel,

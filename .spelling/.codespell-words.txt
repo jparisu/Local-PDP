@@ -1,4 +1,4 @@
-faxai
+faex
 sklearn
 ndarray
 modelling

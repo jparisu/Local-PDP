@@ -1,10 +1,10 @@
-site_name: faxai Documentation
+site_name: faex Documentation
 site_description: Feature Attribution Model-Agnostic Python library for Machine Learning Explainability
 site_author: jparisu
-site_url: https://faxai.readthedocs.io/
+site_url: https://faex.readthedocs.io/
 
-repo_name: jparisu/faxai
-repo_url: https://github.com/jparisu/faxai
+repo_name: jparisu/faex
+repo_url: https://github.com/jparisu/faex
 edit_uri: edit/main/docs
 
 # Theme
@@ -42,4 +42,4 @@ nav:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/jparisu/faxai
+      link: https://github.com/jparisu/faex

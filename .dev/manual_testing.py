@@ -20,9 +20,9 @@ logging.basicConfig(
 import numpy as np
 import pandas as pd
 
-from faxai.mathing.distribution.parametric_distributions import NormalDistribution, UniformDistribution
-from faxai.mathing.distribution.UnionDistribution import UnionDistribution
-from faxai.mathing.RandomGenerator import RandomGenerator
+from faex.mathing.distribution.parametric_distributions import NormalDistribution, UniformDistribution
+from faex.mathing.distribution.UnionDistribution import UnionDistribution
+from faex.mathing.RandomGenerator import RandomGenerator
 
 # Set pandas print options for better readability, wider column and not breaking lines
 pd.set_option('display.precision', 2)
@@ -57,10 +57,10 @@ model = MockModel()
 print(f"Predictions: {model.predict(df_X.head())}")
 
 
-from faxai.explaining.ExplainerCore import ExplainerCore
-from faxai.explaining.DataCore import DataCore
-from faxai.explaining.ExplainerConfiguration import ExplainerConfiguration
-from faxai.explaining.explainers.ICE import ICE
+from faex.explaining.ExplainerCore import ExplainerCore
+from faex.explaining.DataCore import DataCore
+from faex.explaining.ExplainerConfiguration import ExplainerConfiguration
+from faex.explaining.explainers.ICE import ICE
 
 core = ExplainerCore(
     dataframe_X=df_X,
@@ -75,8 +75,8 @@ conf1 = ExplainerConfiguration(
 )
 
 
-from faxai.explaining.explainers.L_ICE import L_ICE
-from faxai.explaining.ExplainerFactory import GlobalExplainerFactory
+from faex.explaining.explainers.L_ICE import L_ICE
+from faex.explaining.ExplainerFactory import GlobalExplainerFactory
 
 
 
