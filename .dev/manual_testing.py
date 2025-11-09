@@ -11,8 +11,9 @@ sys.path.insert(0, str(src_path))
 
 # Activate debugging
 # Silence traces from other modules except my library
-logger = logging.getLogger("faxai")   # use your package name here
-logger.setLevel(logging.DEBUG)        # or INFO
+logging.basicConfig(
+    level=logging.DEBUG,
+)
 
 ########################################################################################################################
 
@@ -24,29 +25,32 @@ from faxai.mathing.distribution.UnionDistribution import UnionDistribution
 from faxai.mathing.RandomGenerator import RandomGenerator
 
 # Set pandas print options for better readability, wider column and not breaking lines
-pd.set_option('display.precision', 4)
+pd.set_option('display.precision', 2)
 pd.set_option('display.width', 100)
 pd.set_option('display.max_columns', None)
 
+# Set numpy print options for better readability
+np.set_printoptions(precision=2, suppress=True)
+np.set_printoptions(threshold=sys.maxsize)
 
-rng = RandomGenerator()
+rng = RandomGenerator(42)
 
-N = 5
+N = 8
 df = pd.DataFrame({
-    "x1": np.linspace(0, 1, N),
-    "x2": np.array(range(N,0,-1)),
-    "x3": rng.gauss(0, 1, N),
-    "target": np.linspace(5, 15, N)
+    "x1": np.linspace(0,10, N),
+    "x2": rng.gauss(0, 1, N),
+    "x3": np.linspace(0,10, N) + rng.gauss(0, 1, N),
+    "target": np.linspace(0, 1, N)
 })
-
 
 df_X, df_y = df[["x1", "x2", "x3"]], df["target"]
 
 print(f"Data: {df_X.head()}")
 
+
 class MockModel:
     def predict(self, df: pd.DataFrame) -> np.ndarray:
-        return df["x1"] * 10 + 5 + df["x3"]
+        return 2 * df["x1"] + df["x3"]
 
 model = MockModel()
 
@@ -65,44 +69,22 @@ core = ExplainerCore(
 
 conf1 = ExplainerConfiguration(
     datacore=core.datacore(),
-    study_features=["x1"],
-    bins=5,
+    study_features=["x1", "x2"],
+    bins=10,
     strict_limits=False,
 )
 
+
+from faxai.explaining.explainers.L_ICE import L_ICE
+from faxai.explaining.ExplainerFactory import GlobalExplainerFactory
+
+
+
+
+print(f"CONFIGURATION: {conf1}")
+
 core.add_configuration("conf1", conf1)
 
+
 ice = core.explain(technique="ice", configuration="conf1")
-
-
-print(f"ICE Predictions: {ice}")
-
-ice2 = core.explain(technique="ice", configuration="conf1")
-
-ice2 = core.explain(technique="ice", configuration="conf1")
-
-dataplotter = core.plot(technique="ice", configuration="conf1", params={"alpha":1.0})
-fig, ax = dataplotter.matplotlib_plot()
-fig.show()
-
-print()
-print(type(dataplotter))
-print(dataplotter)
-print(dataplotter.data)
-for d in dataplotter.data:
-    print(d.x)
-    print(d.y)
-    print(d.params)
-print()
-
-
-
-print(f"ICE Predictions: {ice}")
-
-pdp = core.explain(technique="pdp", configuration="conf1")
-
-print(f"PDP Predictions: {pdp}")
-
-dataplotter = core.plot(technique="pdp", configuration="conf1")
-fig, ax = dataplotter.matplotlib_plot()
-fig.show()
+print(ice)

@@ -1,12 +1,13 @@
 """
-Partial Dependence Plot (PDP) Explainer.
-This class holds the data and methods for generating PDP distributions and plots.
+Local Partial Dependence Plot (l-PDP) Explainer.
+This class holds the data and methods for generating l-PDP distributions and plots.
 """
 
 from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING
+import numpy as np
 
 from faxai.data.DataHolder import HyperPlane, HyperPlanes
 from faxai.data.DataPlotter import DataPlotter
@@ -23,22 +24,18 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class PDP(CacheExplainerData, ExplainerPlot):
+class L_PDP(CacheExplainerData, ExplainerPlot):
     def check_configuration(cls, configuration: ExplainerConfiguration, throw: bool = True) -> bool:
-        """
-        Check if the provided configuration is valid for this explanation technique.
-
-        It requires:
-        - datacore
-        - feature study
-        - feature_values
-        """
         valid = True
 
         # Check the datacore, features and feature values
         valid = valid and configuration.check(throw=throw)
 
+        # Check for kernel
+        valid = valid and configuration.check_kernel(throw=throw)
+
         return valid
+
 
     def _explain(
         self,
@@ -46,18 +43,22 @@ class PDP(CacheExplainerData, ExplainerPlot):
         configuration: ExplainerConfiguration,
         context: ExplainerContext,
     ) -> HyperPlane:
-        logger.debug("PDP explanation generation")
+        logger.debug("l-PDP explanation generation")
 
         # Get ICE values
         # Ice holds the grid and the already predicted values
-        ice: HyperPlanes = context.explain("ice")
-        grid = ice.grid
+        lice: HyperPlanes = context.explain("l-ice")
+        grid = lice.grid
+        values = lice.targets
+        weights = lice.weights
 
-        logger.debug(f"PDP grid shape: {grid.shape()}")
+        # Get the normalization weight
+        kernel_normalizer: HyperPlane = context.explain("kernel-normalizer")
 
-        # Get the predictions by averaging ICE values across all instances
-        ice_values = ice.targets
-        predictions = ice_values.mean(axis=0)
+
+        # Get the predictions by averaging ICE values with weights across all instances
+        weithted = values * weights
+        predictions = weithted.mean(axis=0) / kernel_normalizer.target
 
         # Reshape the predictions to match the grid shape
 
@@ -72,7 +73,7 @@ class PDP(CacheExplainerData, ExplainerPlot):
         params: dict = None,
     ) -> DataPlotter:
         """
-        Plot the PDP values.
+        Plot the l-PDP values.
 
         Args:
             params (dict): Parameters for the plot.
@@ -83,7 +84,7 @@ class PDP(CacheExplainerData, ExplainerPlot):
         params = dict(params) if params else {}
 
         params.setdefault("color", "darkblue")
-        params.setdefault("label", "PDP")
+        params.setdefault("label", "l-PDP")
         params.setdefault("linewidth", 3)
 
         hyperplane = self.explain(context)

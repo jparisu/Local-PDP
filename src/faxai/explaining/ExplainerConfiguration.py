@@ -4,15 +4,17 @@ different techniques.
 """
 
 from __future__ import annotations
+
+import logging
 from dataclasses import dataclass
+
 import numpy as np
 import pandas as pd
-import logging
 
-from faxai.utils.decorators import cache_method
-from faxai.mathing.kernel import Kernel, create_default_kernel
-from faxai.explaining.DataCore import DataCore
 from faxai.data.DataHolder import Grid
+from faxai.explaining.DataCore import DataCore
+from faxai.mathing.kernel import Kernel, create_default_kernel
+from faxai.utils.decorators import cache_method
 
 logger = logging.getLogger(__name__)
 
@@ -36,25 +38,25 @@ class ExplainerConfiguration:
     study_features: list[str] = None
     feature_limits: dict[str, tuple[float, float]] = None
     feature_values: dict[str, np.ndarray] = None
-    locality_ranges: dict[np.ndarray] = None
+    locality_limits: dict[str, np.ndarray] = None
     kernel: Kernel = None
 
     def __init__(
-            self,
-            # Required configuration
-            datacore: DataCore,
-            study_features: list[str],
-            *,
-            # Optional configuration
-            feature_limits: dict[str, tuple[float, float]] | None = None,
-            feature_values: dict[str, np.ndarray] | None = None,
-            locality_ranges: list[float] | None = None,
-            kernel: Kernel = None,
-            # Default configuration arguments
-            use_default: bool = True,
-            bins: int = 50,
-            strict_limits: bool = True,
-            locality_size: dict[float] = None
+        self,
+        # Required configuration
+        datacore: DataCore,
+        study_features: list[str],
+        *,
+        # Optional configuration
+        feature_limits: dict[str, tuple[float, float]] | None = None,
+        feature_values: dict[str, np.ndarray] | None = None,
+        locality_limits: dict[str, np.ndarray] | None = None,
+        kernel: Kernel = None,
+        # Default configuration arguments
+        use_default: bool = True,
+        bins: int = 50,
+        strict_limits: bool = True,
+        locality_size: dict[float] = None,
     ):
         """
         Initialize the ExplanationConfiguration with the core and study features.
@@ -71,28 +73,24 @@ class ExplainerConfiguration:
         # Optional configuration
         self.feature_limits = feature_limits
         self.feature_values = feature_values
-        self.locality_ranges = locality_ranges
+        self.locality_limits = locality_limits
         self.kernel = kernel
 
         # Set default configuration if required
         if use_default:
             self.set_default_configuration(
-                override_existing=False,
-                bins=bins,
-                strict_limits=strict_limits,
-                locality_size=locality_size
+                override_existing=False, bins=bins, strict_limits=strict_limits, locality_size=locality_size
             )
-
 
     ############################################################
     # Default configuration setters
 
     def set_default_configuration(
-            self,
-            override_existing: bool = False,
-            bins: int = 50,
-            strict_limits: bool = True,
-            locality_size: dict[float] = None,
+        self,
+        override_existing: bool = False,
+        bins: int = 50,
+        strict_limits: bool = True,
+        locality_size: dict[float] = None,
     ) -> None:
         """
         Set default configuration values for the explanation.
@@ -104,35 +102,26 @@ class ExplainerConfiguration:
         if override_existing:
             self.feature_limits = None
             self.feature_values = None
-            self.locality_ranges = None
+            self.locality_limits = None
             self.kernel = None
 
         # FEATURE LIMITS
         if self.feature_limits is None:
-            self.feature_limits = self.default_feature_limits(
-                bins=bins,
-                strict_limits=strict_limits
-            )
+            self.feature_limits = self.default_feature_limits(bins=bins, strict_limits=strict_limits)
 
         # FEATURE VALUES
         if self.feature_values is None:
             self.feature_values = self.default_feature_values(bins=bins)
 
         # LOCALITY RANGES
-        if self.locality_ranges is None:
-            self.locality_ranges = self.default_locality_ranges(
-                locality_size=locality_size
-            )
+        if self.locality_limits is None:
+            self.locality_limits = self.default_locality_limits(locality_size=locality_size)
 
         # KERNEL
         if self.kernel is None:
             self.kernel = self.defaul_kernel()
 
-
-    def default_feature_limits(
-            self,
-            bins: int = 50,
-            strict_limits: bool = True) -> dict[str, tuple[float, float]]:
+    def default_feature_limits(self, bins: int = 50, strict_limits: bool = True) -> dict[str, tuple[float, float]]:
         """
         Get default values for the limits for non-study features.
 
@@ -151,10 +140,7 @@ class ExplainerConfiguration:
             return feature_limits
 
         for feature in self.study_features:
-            feature_limit = (
-                self.datacore.df_X[feature].min(),
-                self.datacore.df_X[feature].max()
-            )
+            feature_limit = (self.datacore.df_X[feature].min(), self.datacore.df_X[feature].max())
 
             if not strict_limits:
                 # Calculate the bin width
@@ -162,19 +148,12 @@ class ExplainerConfiguration:
                 bin_width = total_range / bins
 
                 # Extend the limits by half a bin width
-                feature_limit = (
-                    feature_limit[0] - bin_width / 2,
-                    feature_limit[1] + bin_width / 2
-                )
+                feature_limit = (feature_limit[0] - bin_width / 2, feature_limit[1] + bin_width / 2)
             feature_limits[feature] = feature_limit
 
         return feature_limits
 
-
-    def default_feature_values(
-            self,
-            bins: int = 50
-    ) -> np.ndarray:
+    def default_feature_values(self, bins: int = 50) -> np.ndarray:
         """
         Set default values for the feature values for non-study features.
 
@@ -185,19 +164,14 @@ class ExplainerConfiguration:
 
         for feature in self.study_features:
             limits = self.feature_limits[feature]
-            feature_values[feature] = np.linspace(
-                limits[0],
-                limits[1],
-                bins
-            )
+            feature_values[feature] = np.linspace(limits[0], limits[1], bins)
 
         return feature_values
 
-
-    def default_locality_ranges(
-            self,
-            locality_size: dict[float] = None,
-    ) -> dict[np.ndarray]:
+    def default_locality_limits(
+        self,
+        locality_size: dict[float] = None,
+    ) -> dict[str, np.ndarray]:
         """
         Set default locality ranges for the non-study features.
 
@@ -207,10 +181,9 @@ class ExplainerConfiguration:
         Otherwise, the standard deviation of each feature will be used as the locality range.
         """
 
-        locality_ranges = {}
+        locality_limits = {}
 
         for feature in self.study_features:
-
             # If no locality set, use standard deviation
             if locality_size is not None and feature in locality_size:
                 locality = locality_size[feature]
@@ -220,25 +193,23 @@ class ExplainerConfiguration:
 
             # Generate an array of float from limits minimum of the feature with separation of locality
             limits = self.feature_limits[feature]
-            locality_ranges[feature] = np.arange(
-                limits[0],
-                limits[1],
-                locality
-            )
+            locality_limits[feature] = np.arange(limits[0], limits[1], locality)
 
-        return locality_ranges
+            locality_limits[feature] = np.append(locality_limits[feature], np.inf)
+
+            # Set first value to -inf
+            locality_limits[feature][0] = -np.inf
+
+        return locality_limits
 
 
-    def defaul_kernel(
-            self
-    ) -> Kernel:
+    def defaul_kernel(self) -> Kernel:
         """
         Set default kernel for the explanation.
 
         The kernel will be instantiated using the provided kernel constructor.
         """
-        return create_default_kernel(self.datacore.df_X[self.datacore.features()])
-
+        return create_default_kernel(self.datacore.df_X[self.study_features])
 
     ############################################################
     # Data generation functions
@@ -249,7 +220,6 @@ class ExplainerConfiguration:
         Generate a grid with the feature values for the study features.
         """
         return Grid([self.feature_values[feature] for feature in self.study_features])
-
 
     @cache_method
     def get_grid_dataframe(self) -> pd.DataFrame:
@@ -265,11 +235,17 @@ class ExplainerConfiguration:
 
         # Cross join: repeat each df row (restricted to non-grid cols) for every grid combo
         left = prod.assign(_k=1)
-        right = self.datacore.df_X[self.non_study_features()].assign(_k=1) if self.non_study_features() else pd.DataFrame({'_k':[1]})
+        right = (
+            self.datacore.df_X[self.non_study_features()].assign(_k=1)
+            if self.non_study_features()
+            else pd.DataFrame({"_k": [1]})
+        )
         out = left.merge(right, on="_k").drop(columns="_k")
 
-        return out
+        # Rearrange columns to match datacore
+        out = out[self.datacore.df_X.columns]
 
+        return out
 
     ############################################################
     # Auxiliary functions
@@ -277,11 +253,40 @@ class ExplainerConfiguration:
     @cache_method
     def non_study_features(self) -> list[str]:
         """Get the name of the non-study features."""
-        return [
-            feature for feature in self.datacore.features()
-            if feature not in self.study_features
-        ]
+        return [feature for feature in self.datacore.features() if feature not in self.study_features]
 
+    def locality_ranges(self) -> dict[str, list[tuple[float, float]]]:
+        """
+        Get the locality ranges as a dictionary of feature name to list of (min, max) tuples.
+
+        Returns:
+            dict[str, list[tuple[float, float]]]: Locality ranges for each study feature.
+        """
+
+        locality_ranges = {}
+
+        for feature in self.study_features:
+            limits = self.feature_limits[feature]
+            localities = self.locality_limits[feature]
+
+            ranges = []
+            for i in range(1, len(localities)):
+                range_min = localities[i-1]
+                range_max = localities[i]
+                ranges.append((range_min, range_max))
+
+            locality_ranges[feature] = ranges
+
+        return locality_ranges
+
+    def study_feature_dataframe(self) -> pd.DataFrame:
+        """
+        Get the feature values for the study features as a 2D numpy array.
+
+        Returns:
+            np.ndarray: 2D array of shape (num_study_features, num_feature_values).
+        """
+        return self.datacore.df_X[self.study_features]
 
     ############################################################
     # Check functions and utilities
@@ -347,9 +352,93 @@ class ExplainerConfiguration:
             bool: True if the locality ranges configuration is valid, False otherwise.
         """
 
-        if self.locality_ranges is None:
+        if self.locality_limits is None:
             if throw:
                 raise ValueError("Locality ranges configuration is not set.")
             return False
 
         return True
+
+
+    def __str__(self) -> str:
+        """
+        String representation of the ExplainerConfiguration.
+
+        Returns:
+            str: String representation of the configuration.
+        """
+        return (
+            f"ExplainerConfiguration(\n"
+            f"  datacore={self.datacore},\n"
+            f"  study_features={self.study_features},\n"
+            f"  feature_limits={self.feature_limits},\n"
+            f"  feature_values size={ {k: v.shape for k, v in self.feature_values.items()} },\n"
+            f"  locality_limits={self.locality_limits},\n"
+            f"  kernel={self.kernel}\n"
+            f")"
+        )
+
+
+    def to_univariate(self) -> UnivariateExplainerConfiguration:
+        """
+        Convert the current configuration to a UnivariateExplainerConfiguration.
+
+        Returns:
+            UnivariateExplainerConfiguration: The univariate configuration.
+        """
+        if len(self.study_features) != 1:
+            raise ValueError("Cannot convert to UnivariateExplainerConfiguration: study_features length is not 1.")
+
+        return UnivariateExplainerConfiguration(
+            datacore=self.datacore,
+            study_features=self.study_features,
+            feature_limits=self.feature_limits,
+            feature_values=self.feature_values,
+            locality_limits=self.locality_limits,
+            kernel=self.kernel,
+        )
+
+
+class UnivariateExplainerConfiguration(ExplainerConfiguration):
+
+    """
+    Configuration class for univariate explanation generation.
+
+    This class holds various parameters that can be adjusted to customize univariate explanation techniques.
+    This facilitates flexibility and adaptability in generating explanations for machine learning models.
+
+    Attributes:
+        datacore (DataCore): The ExplainerCore instance containing the dataset and model.
+        study_feature (str): The feature name to study.
+        feature_limit (tuple[float, float]): The limits for the study feature.
+        feature_values (np.ndarray): The values for the study feature.
+        locality_limits (np.ndarray): The locality limits for the study feature.
+        kernel (Kernel): The kernel to use for locality weighting.
+    """
+
+    def uni_study_feature(self):
+        return self.study_features[0]
+
+    def uni_feature_values(self):
+        return self.feature_values[self.uni_study_feature()]
+
+    def uni_feature_limit(self):
+        return self.feature_limits[self.uni_study_feature()]
+
+    def uni_locality_limits(self):
+        return self.locality_limits[self.uni_study_feature()]
+
+    def uni_histogram_limits(self):
+        # Set an array where first and las are not infinite
+        limits = self.uni_locality_limits().copy()
+        limits[0] = self.uni_feature_limit()[0]
+        limits[-1] = self.uni_feature_limit()[1]
+        return limits
+
+    def uni_study_feature_array(self) -> np.ndarray:
+        """
+        Get the feature values for the study feature as a 1D numpy array.
+        Returns:
+            np.ndarray: 1D array of shape (num_feature_values,).
+        """
+        return self.datacore.df_X[self.uni_study_feature()].to_numpy()

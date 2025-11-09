@@ -1,18 +1,15 @@
 from __future__ import annotations
 
-import math
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union
-
-import numpy as np
-from numpy.typing import NDArray
+from collections.abc import Iterable, Sequence
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
-from matplotlib.collections import LineCollection as MplLineCollection
-
+import numpy as np
 import plotly.graph_objects as go
+from matplotlib.collections import LineCollection as MplLineCollection
+from numpy.typing import NDArray
 from plotly.subplots import make_subplots
-
 
 # ---------------------------------------------------------------------------
 # Utilities
@@ -119,6 +116,7 @@ def _forward_fill_for_continuous(y: NDArray[np.floating]) -> NDArray[np.floating
 # Base class
 # ---------------------------------------------------------------------------
 
+
 class DataPlotter(ABC):
     """
     Base interface for lightweight plotting adapters that can render to
@@ -158,11 +156,21 @@ class DataPlotter(ABC):
 # Primitives
 # ---------------------------------------------------------------------------
 
+
+class DP_Empty(DataPlotter):
+    """An empty plotter that draws nothing."""
+
+    def _matplotlib_plot(self, ax: plt.Axes) -> None:
+        pass
+
+    def _plotly_plot(self, fig: go.Figure, *, row: Optional[int] = None, col: Optional[int] = None) -> None:
+        pass
+
+
 class DP_Line(DataPlotter):
     """Line plot."""
 
-    def __init__(self, x: NDArray[np.floating], y: NDArray[np.floating],
-                 params: Optional[Dict[str, Any]] = None):
+    def __init__(self, x: NDArray[np.floating], y: NDArray[np.floating], params: Optional[Dict[str, Any]] = None):
         self.x = _as_1d(x)
         self.y = _as_1d(y)
         _check_xy(self.x, self.y, "DP_Line")
@@ -179,8 +187,7 @@ class DP_Line(DataPlotter):
 class DP_Scatter(DataPlotter):
     """Scatter plot."""
 
-    def __init__(self, x: NDArray[np.floating], y: NDArray[np.floating],
-                 params: Optional[Dict[str, Any]] = None):
+    def __init__(self, x: NDArray[np.floating], y: NDArray[np.floating], params: Optional[Dict[str, Any]] = None):
         self.x = _as_1d(x)
         self.y = _as_1d(y)
         _check_xy(self.x, self.y, "DP_Scatter")
@@ -197,8 +204,13 @@ class DP_Scatter(DataPlotter):
 class DP_Area(DataPlotter):
     """Filled area between `y_min` and `y_max` over `x`."""
 
-    def __init__(self, x: NDArray[np.floating], y_min: NDArray[np.floating], y_max: NDArray[np.floating],
-                 params: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self,
+        x: NDArray[np.floating],
+        y_min: NDArray[np.floating],
+        y_max: NDArray[np.floating],
+        params: Optional[Dict[str, Any]] = None,
+    ):
         self.x = _as_1d(x)
         self.y_min = _as_1d(y_min)
         self.y_max = _as_1d(y_max)
@@ -225,9 +237,13 @@ class DP_Histogram(DataPlotter):
     Note: This is different from `density=True` which normalizes area under the histogram.
     """
 
-    def __init__(self, x: NDArray[np.floating], bins: Optional[Union[int, Sequence[float]]] = None,
-                 params: Optional[Dict[str, Any]] = None, max_height: float = 1.0,
-                 ):
+    def __init__(
+        self,
+        x: NDArray[np.floating],
+        bins: Optional[Union[int, Sequence[float]]] = None,
+        params: Optional[Dict[str, Any]] = None,
+        max_height: float = 1.0,
+    ):
         self.x = _as_1d(x)
         self.bins = bins
         self.params = _copy_params(params)
@@ -284,7 +300,7 @@ class DP_Histogram(DataPlotter):
         scale = self.max_height / peak
         heights = counts.astype(float) * scale
         centers = 0.5 * (edges[:-1] + edges[1:])
-        widths = (edges[1:] - edges[:-1])
+        widths = edges[1:] - edges[:-1]
 
         style = _mpl_to_plotly_style(self.params)
         # Map Matplotlib alpha -> Plotly marker opacity if not already mapped
@@ -300,10 +316,7 @@ class DP_Histogram(DataPlotter):
             # Bars don't support dash; ignore
             pass
 
-        fig.add_trace(
-            go.Bar(x=centers, y=heights, width=widths, marker=marker, **style),
-            row=row, col=col
-        )
+        fig.add_trace(go.Bar(x=centers, y=heights, width=widths, marker=marker, **style), row=row, col=col)
 
 
 class DP_VerticalLine(DataPlotter):
@@ -325,7 +338,8 @@ class DP_VerticalLine(DataPlotter):
             line_width=self.params.get("linewidth", self.params.get("lw", None)),
             line_dash=line_dash,
             opacity=self.params.get("alpha", None),
-            row=row, col=col
+            row=row,
+            col=col,
         )
 
 
@@ -338,8 +352,7 @@ class DP_LineCollection(DataPlotter):
       - a list of 2-tuples: [((x0, y0), (x1, y1)), ...]
     """
 
-    def __init__(self, segments: Iterable[Iterable[Iterable[float]]],
-                 params: Optional[Dict[str, Any]] = None):
+    def __init__(self, segments: Iterable[Iterable[Iterable[float]]], params: Optional[Dict[str, Any]] = None):
         self.segments = list(segments)
         self.params = _copy_params(params)
 
@@ -362,8 +375,7 @@ class DP_LineCollection(DataPlotter):
 class DP_Collection(DataPlotter):
     """A container for other plotters."""
 
-    def __init__(self, data: Optional[List[DataPlotter]] = None,
-                 params: Optional[Dict[str, Any]] = None):
+    def __init__(self, data: Optional[List[DataPlotter]] = None, params: Optional[Dict[str, Any]] = None):
         self.data: List[DataPlotter] = list(data) if data else []
         self.params = _copy_params(params)
 
@@ -385,8 +397,13 @@ class DP_Collection(DataPlotter):
 class DP_ErrorBar(DataPlotter):
     """Errorbar plot where `yerr` are symmetric absolute errors."""
 
-    def __init__(self, x: NDArray[np.floating], y: NDArray[np.floating], yerr: NDArray[np.floating],
-                 params: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self,
+        x: NDArray[np.floating],
+        y: NDArray[np.floating],
+        yerr: NDArray[np.floating],
+        params: Optional[Dict[str, Any]] = None,
+    ):
         self.x = _as_1d(x)
         self.y = _as_1d(y)
         self.yerr = _as_1d(yerr)
@@ -410,7 +427,8 @@ class DP_ErrorBar(DataPlotter):
                 error_y=dict(type="data", array=self.yerr, visible=True),
                 **style,
             ),
-            row=row, col=col
+            row=row,
+            col=col,
         )
 
 
@@ -433,9 +451,15 @@ class DP_NormalDistributionArea(DataPlotter):
         Number of sigma bands between 0 and `max_std`.
     """
 
-    def __init__(self, x: NDArray[np.floating], mus: NDArray[np.floating], stds: NDArray[np.floating],
-                 max_std: float = 3.0, areas: int = 3,
-                 params: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self,
+        x: NDArray[np.floating],
+        mus: NDArray[np.floating],
+        stds: NDArray[np.floating],
+        max_std: float = 3.0,
+        areas: int = 3,
+        params: Optional[Dict[str, Any]] = None,
+    ):
         self.x = _as_1d(x)
         self.mus = _as_1d(mus)
         self.stds = _as_1d(stds)
@@ -467,9 +491,7 @@ class DP_NormalDistributionArea(DataPlotter):
         for sigma in sigmas[1:]:
             y_min = self.mus - sigma * self.stds
             y_max = self.mus + sigma * self.stds
-            self.plot_areas.append(
-                DP_Area(x=self.x, y_min=y_min, y_max=y_max, params=band_params)
-            )
+            self.plot_areas.append(DP_Area(x=self.x, y_min=y_min, y_max=y_max, params=band_params))
 
     def _matplotlib_plot(self, ax: plt.Axes) -> None:
         if not self._calculated:
@@ -494,8 +516,7 @@ class DP_ContinuousLine(DataPlotter):
       • NaN segments use '-.' and half the normal width (Plotly dashdot, width/2).
     """
 
-    def __init__(self, x: NDArray[np.floating], y: NDArray[np.floating],
-                 params: Optional[Dict[str, Any]] = None):
+    def __init__(self, x: NDArray[np.floating], y: NDArray[np.floating], params: Optional[Dict[str, Any]] = None):
         self.x = _as_1d(x)
         self.y = _as_1d(y)
         _check_xy(self.x, self.y, "DP_ContinuousLine")
@@ -540,9 +561,15 @@ class DP_WeightedLine(DataPlotter):
     - If all weights are equal, draws all segments with `max_width`.
     """
 
-    def __init__(self, x: NDArray[np.floating], y: NDArray[np.floating], weights: NDArray[np.floating],
-                 max_width: Optional[float] = None, min_width: float = 0.0,
-                 params: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self,
+        x: NDArray[np.floating],
+        y: NDArray[np.floating],
+        weights: NDArray[np.floating],
+        max_width: Optional[float] = None,
+        min_width: float = 0.0,
+        params: Optional[Dict[str, Any]] = None,
+    ):
         self.x = _as_1d(x)
         self.y = _as_1d(y)
         _check_xy(self.x, self.y, "DP_WeightedLine")
@@ -562,7 +589,7 @@ class DP_WeightedLine(DataPlotter):
         collection = DP_Collection()
         w_max = float(np.max(self.weights))
         w_min = float(np.min(self.weights))
-        denom = (w_max - w_min)
+        denom = w_max - w_min
 
         for i in range(self.x.size - 1):
             # Compute width safely

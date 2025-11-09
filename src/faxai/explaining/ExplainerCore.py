@@ -3,20 +3,22 @@ Core for data holding and efficient processing in Explainer module.
 """
 
 from __future__ import annotations
-from typing import Any, Callable
+
 import logging
-from dataclasses import dataclass
+from typing import Any
+
 import pandas as pd
 
-from faxai.explaining.DataCore import DataCore
-from faxai.explaining.ExplainerContext import ExplainerContext
-from faxai.explaining.ExplainerConfiguration import ExplainerConfiguration
 from faxai.data.DataHolder import DataHolder
 from faxai.data.DataPlotter import DataPlotter
+from faxai.explaining.DataCore import DataCore
+from faxai.explaining.ExplainerConfiguration import ExplainerConfiguration
+from faxai.explaining.ExplainerContext import ExplainerContext
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_CONFIGURATION_NAME = "__default__"
+
 
 class ExplainerCore:
     """
@@ -25,7 +27,6 @@ class ExplainerCore:
     This class holds the dataset (test or all) and the trained model to explain.
     It is used for efficient data processing and management within the Explainer module.
     """
-
 
     def __init__(
         self,
@@ -70,14 +71,10 @@ class ExplainerCore:
         # Set default configuration params
         self._default_configuration_params: dict[str, Any] = {}
 
-
     #####################
     # Configuration
 
-    def set_default_configuration_params(
-            self,
-            params: dict[str, Any]
-    ) -> None:
+    def set_default_configuration_params(self, params: dict[str, Any]) -> None:
         """
         Set the default explanation configuration.
 
@@ -86,10 +83,9 @@ class ExplainerCore:
         """
         self._default_configuration_params = params
 
-
     def __get_default_configuration(
-            self,
-            features: list[str] | None = None,
+        self,
+        features: list[str] | None = None,
     ) -> ExplainerConfiguration:
         """
         Get the default explanation configuration.
@@ -100,20 +96,19 @@ class ExplainerCore:
 
         # Remove feature_study from params if exists
         params = self._default_configuration_params.copy()
-        features_params = params.pop('study_features', None)
+        features_params = params.pop("study_features", None)
 
         if not features:
             features = features_params
 
         elif features and features_params and features != features_params:
-            raise ValueError(f"Default configuration already has study features set {features_params}, cannot override.")
+            raise ValueError(
+                f"Default configuration already has study features set {features_params}, cannot override."
+            )
 
         return ExplainerConfiguration(
-            datacore=self.datacore(),
-            study_features=features,
-            **self._default_configuration_params
+            datacore=self.datacore(), study_features=features, **self._default_configuration_params
         )
-
 
     def __new_configuration_id(self) -> str:
         """
@@ -124,12 +119,11 @@ class ExplainerCore:
         """
         return "__config__" + str(len(self._contexts) + 1)
 
-
     def add_configuration(
-            self,
-            name: str,
-            configuration: ExplainerConfiguration | None = None,
-            override: bool = True,
+        self,
+        name: str,
+        configuration: ExplainerConfiguration | None = None,
+        override: bool = True,
     ) -> None:
         """
         Add an explanation configuration to the core.
@@ -151,7 +145,6 @@ class ExplainerCore:
             configuration=configuration,
         )
 
-
     #####################
     # Getters
 
@@ -164,18 +157,16 @@ class ExplainerCore:
         """
         return self._datacore
 
-
     #####################
     #      EXPLAIN      #
     #####################
 
     def explain(
-            self,
-            technique: str,
-            configuration: str | list[str] | ExplainerConfiguration | None,
-            **kwargs,
+        self,
+        technique: str,
+        configuration: str | list[str] | ExplainerConfiguration | None,
+        **kwargs,
     ) -> DataHolder:
-
         """
         Generate explanations using the specified technique and configuration.
 
@@ -192,14 +183,12 @@ class ExplainerCore:
         # Generate explanations
         return self._contexts[configuration_name].explain(technique, **kwargs)
 
-
     def plot(
-            self,
-            technique: str,
-            configuration: str | list[str] | ExplainerConfiguration | None,
-            **kwargs,
+        self,
+        technique: str,
+        configuration: str | list[str] | ExplainerConfiguration | None,
+        **kwargs,
     ) -> DataPlotter:
-
         """
         Generate explanations using the specified technique and configuration.
 
@@ -216,10 +205,9 @@ class ExplainerCore:
         # Generate explanations
         return self._contexts[configuration_name].plot(technique, **kwargs)
 
-
     def __resolve_configuration_name(
-            self,
-            configuration: str | list[str] | ExplainerConfiguration | None,
+        self,
+        configuration: str | list[str] | ExplainerConfiguration | None,
     ) -> str:
         """
         To facilitate explainer configuration retrieval, the method accepts multiple input types:
@@ -258,9 +246,8 @@ class ExplainerCore:
 
         # Case 4
         if isinstance(configuration, list):
-
             # Feature list provided
-            name = ','.join(configuration)
+            name = ",".join(configuration)
             # Check if the configuration already exists
             if name in self._contexts:
                 return name
@@ -272,8 +259,9 @@ class ExplainerCore:
 
         # Error, non configuration found
         raise ValueError(
-            f"Incorrect configuration. Set the name of a stored configuration, or the name of a feature or features"
-            +"to study with default configuration.")
+            "Incorrect configuration. Set the name of a stored configuration, or the name of a feature or features"
+            + "to study with default configuration."
+        )
 
     ####################
     #       PLOT       #

@@ -9,12 +9,12 @@ import logging
 from typing import TYPE_CHECKING
 
 from faxai.data.DataHolder import HyperPlanes
-from faxai.data.holder_to_plotter import from_hyperplanes_to_lines
-from faxai.explaining.ExplainerConfiguration import ExplainerConfiguration
+from faxai.data.DataPlotter import DataPlotter
+from faxai.data.holder_to_plotter import from_hyperplanes_to_lines, from_hyperplanes_to_scatter
 from faxai.explaining.DataCore import DataCore
 from faxai.explaining.Explainer import ExplainerPlot
+from faxai.explaining.ExplainerConfiguration import ExplainerConfiguration
 from faxai.explaining.explainers.CacheExplainer import CacheExplainerData
-from faxai.data.DataPlotter import DataPlotter
 
 # Avoid circular imports with TYPE_CHECKING
 if TYPE_CHECKING:
@@ -22,8 +22,8 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-class ICE(CacheExplainerData, ExplainerPlot):
 
+class ICE(CacheExplainerData, ExplainerPlot):
 
     def check_configuration(cls, configuration: ExplainerConfiguration, throw: bool = True) -> bool:
         """
@@ -41,14 +41,12 @@ class ICE(CacheExplainerData, ExplainerPlot):
 
         return valid
 
-
     def _explain(
         self,
         datacore: DataCore,
         configuration: ExplainerConfiguration,
         context: ExplainerContext,
     ) -> HyperPlanes:
-
         logger.debug("ICE explanation generation")
 
         # Get the grid dataframe from configuration
@@ -66,16 +64,16 @@ class ICE(CacheExplainerData, ExplainerPlot):
 
         # Reshape the predictions to match the grid shape
         n = len(configuration.datacore)
-        reshaped_predictions = predictions.reshape(*grid.shape(), n)
+        new_shape = grid.shape() + (n,)
+        reshaped_predictions = predictions.reshape(new_shape)
+
+        # Transpose to have shape (n, grid_size)
+        reshaped_predictions = reshaped_predictions.transpose(-1, *range(len(grid.shape())))
 
         return HyperPlanes(grid=grid, targets=reshaped_predictions)
 
 
-    def plot(
-            self,
-            context: ExplainerContext,
-            params: dict = None
-    ) -> DataPlotter:
+    def plot(self, context: ExplainerContext, params: dict = None) -> DataPlotter:
         """
         Plot the ICE values.
 
@@ -95,6 +93,33 @@ class ICE(CacheExplainerData, ExplainerPlot):
         hyperplane = self.explain(context)
 
         return from_hyperplanes_to_lines(
+            hyperplanes=hyperplane,
+            params=params,
+        )
+
+
+class ICE_Scatter(ExplainerPlot):
+
+    def plot(self, context: ExplainerContext, params: dict = None) -> DataPlotter:
+        """
+        Plot the ICE scatter values.
+
+        Args:
+            params (dict): Parameters for the plot.
+
+        Returns:
+            DataPlotter: The plotter object.
+        """
+        params = dict(params) if params else {}
+
+        params.setdefault("color", "teal")
+        params.setdefault("label", "ICE Scatter")
+        params.setdefault("s", 10)
+        params.setdefault("alpha", 0.5)
+
+        hyperplane = context.explain("ice")
+
+        return from_hyperplanes_to_scatter(
             hyperplanes=hyperplane,
             params=params,
         )
