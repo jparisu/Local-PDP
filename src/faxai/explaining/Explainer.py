@@ -3,14 +3,11 @@ Core for data holding and efficient processing in Explainer module.
 """
 
 from __future__ import annotations
-from typing import Any, Dict, List, Optional, Union
-import numpy as np
-import pandas as pd
+
 import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from faxai.utils.decorators import cache_method
 from faxai.data.DataHolder import DataHolder
 from faxai.data.DataPlotter import DataPlotter
 from faxai.explaining.ExplainerConfiguration import ExplainerConfiguration
@@ -32,22 +29,19 @@ class Explainer(ABC):
     # Static Methods
 
     @classmethod
-    @abstractmethod
-    def check_configuration(
-            cls,
-            configuration: ExplainerConfiguration,
-            throw: bool = True
-    ) -> bool:
+    def check_configuration(cls, configuration: ExplainerConfiguration, throw: bool = True) -> bool:
         """
         Check if the provided configuration is valid for this explanation technique.
 
+        By default, check datacore presence.
         Args:
             configuration (ExplainerConfiguration): The configuration to check.
 
         Returns:
             List[ExplainerConfiguration]: A list of valid configurations.
         """
-        pass
+        return configuration.check(throw=throw)
+
 
     @classmethod
     def name(cls) -> str:
@@ -66,11 +60,7 @@ class ExplainerData(Explainer):
     """
 
     @abstractmethod
-    def explain(
-        self,
-        context: ExplainerContext,
-        **kwargs: Any
-    ) -> DataHolder:
+    def explain(self, context: ExplainerContext, **kwargs: Any) -> DataHolder:
         """
         Generate explanations based on context, that holds configuration and data.
         """
@@ -83,11 +73,7 @@ class ExplainerPlot(Explainer):
     """
 
     @abstractmethod
-    def plot(
-        self,
-        context: ExplainerContext,
-        **kwargs: Any
-    ) -> DataPlotter:
+    def plot(self, context: ExplainerContext, **kwargs: Any) -> DataPlotter:
         """
         Generate plots based on the explanations in context.
         """

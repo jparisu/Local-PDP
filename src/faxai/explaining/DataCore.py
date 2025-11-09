@@ -4,12 +4,14 @@ different techniques.
 """
 
 from __future__ import annotations
-from dataclasses import dataclass
-import numpy as np
-import pandas as pd
-from typing import Any
+
 import logging
 import weakref
+from dataclasses import dataclass
+from typing import Any
+
+import numpy as np
+import pandas as pd
 
 from faxai.utils.decorators import cache_method
 
@@ -43,8 +45,7 @@ class DataCore:
         self.model = model
         self.df_X = df_X
 
-        self.__cache_predictions_df: "weakref.WeakKeyDictionary[pd.DataFrame, np.ndarray]" = weakref.WeakKeyDictionary()
-
+        self.__cache_predictions_df: weakref.WeakKeyDictionary[pd.DataFrame, np.ndarray] = weakref.WeakKeyDictionary()
 
     def features(self) -> list[str]:
         """Get the feature names from the DataFrame."""
@@ -54,12 +55,10 @@ class DataCore:
         """Get the number of samples in the DataFrame."""
         return len(self.df_X)
 
-
     @cache_method
     def get_real_predictions(self) -> np.ndarray:
         """Get the real predictions from the model."""
         return self.model.predict(self.df_X)
-
 
     def predict(self, df_X: pd.DataFrame) -> np.ndarray:
         """
@@ -93,7 +92,6 @@ class DataCore:
         # self.__cache_predictions_df[df_X] = predictions
 
         return predictions
-
 
     def valid(self, throw: bool = True) -> bool:
         """

@@ -3,21 +3,21 @@ Core for data holding and efficient processing in Explainer module.
 """
 
 from __future__ import annotations
-from typing import Any, Callable
-import logging
-from dataclasses import dataclass
-from typing import TypeVar
 
-from faxai.explaining.DataCore import DataCore
-from faxai.explaining.ExplainerConfiguration import ExplainerConfiguration
-from faxai.explaining.Explainer import Explainer, ExplainerData, ExplainerPlot
-from faxai.explaining.ExplainerFactory import ExplainerFactory, GlobalExplainerFactory
+import logging
+from typing import Any, TypeVar
+
 from faxai.data.DataHolder import DataHolder
 from faxai.data.DataPlotter import DataPlotter
+from faxai.explaining.DataCore import DataCore
+from faxai.explaining.Explainer import Explainer, ExplainerData, ExplainerPlot
+from faxai.explaining.ExplainerConfiguration import ExplainerConfiguration
+from faxai.explaining.ExplainerFactory import ExplainerFactory, GlobalExplainerFactory
 
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T", bound="Explainer")
+
 
 class ExplainerContext:
     """
@@ -31,23 +31,24 @@ class ExplainerContext:
     """
 
     def __init__(
-            self,
-            datacore: DataCore,
-            configuration: ExplainerConfiguration,
-            explainers: dict[str, Explainer] | None = None,
-            factory: ExplainerFactory | None = None,
+        self,
+        datacore: DataCore,
+        configuration: ExplainerConfiguration,
+        explainers: dict[str, Explainer] | None = None,
+        factory: ExplainerFactory | None = None,
     ):
         self.datacore = datacore
         self.configuration = configuration
         self.explainers = explainers if explainers is not None else {}
         self.factory = factory if factory is not None else GlobalExplainerFactory()
 
+        # Apply name convention to existing explainers
+        self.explainers = {
+            ExplainerFactory.name_convention(name): explainer
+            for name, explainer in self.explainers.items()
+        }
 
-    def __get_explainer_or_create(
-        self,
-        technique: str,
-        forced_type: type[T]
-    ) -> T:
+    def __get_explainer_or_create(self, technique: str, forced_type: type[T]) -> T:
         """
         Get the explainer from the context, or create it using the factory if not present.
 
@@ -58,6 +59,8 @@ class ExplainerContext:
         Returns:
             Explainer: The requested explainer instance.
         """
+        technique = ExplainerFactory.name_convention(technique)
+
         if technique not in self.explainers:
             # Try to create the explainer from the factory
             explainer = self.factory.create_explainer(technique)
@@ -72,12 +75,7 @@ class ExplainerContext:
 
         return explainer
 
-
-    def explain(
-        self,
-        technique: str,
-        **kwargs: Any
-    ) -> DataHolder:
+    def explain(self, technique: str, **kwargs: Any) -> DataHolder:
         """
         Call the explain method of the specified explainer.
         If the technique is not yet in the context, look it up in Factory.
@@ -89,14 +87,11 @@ class ExplainerContext:
             Any: The result of the explanation.
         """
         explainer = self.__get_explainer_or_create(technique, forced_type=ExplainerData)
+        explainer.check_configuration(self.configuration, throw=True)
         return explainer.explain(context=self, **kwargs)
 
 
-    def plot(
-        self,
-        technique: str,
-        **kwargs: Any
-    ) -> DataPlotter:
+    def plot(self, technique: str, **kwargs: Any) -> DataPlotter:
         """
         Call the plot method of the specified explainer.
         If the technique is not yet in the context, look it up in Factory.
@@ -108,7 +103,5 @@ class ExplainerContext:
             Any: The result of the plotting.
         """
         explainer = self.__get_explainer_or_create(technique, forced_type=ExplainerPlot)
-        return explainer.plot(
-            context=self,
-            **kwargs
-        )
+        explainer.check_configuration(self.configuration, throw=True)
+        return explainer.plot(context=self, **kwargs)

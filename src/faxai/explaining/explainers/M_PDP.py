@@ -1,6 +1,6 @@
 """
-Partial Dependence Plot (PDP) Explainer.
-This class holds the data and methods for generating PDP distributions and plots.
+Marginal Partial Dependence Plot (M-PDP) Explainer.
+This class holds the data and methods for generating M-PDP distributions and plots.
 """
 
 from __future__ import annotations
@@ -8,9 +8,9 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from faxai.data.DataHolder import HyperPlane, HyperPlanes
+from faxai.data.DataHolder import HyperPlane, HyperPlanes, DataHolderCollection
 from faxai.data.DataPlotter import DataPlotter
-from faxai.data.holder_to_plotter import from_hyperplane_to_line
+from faxai.data.holder_to_plotter import from_collection_to_lines
 from faxai.explaining.DataCore import DataCore
 from faxai.explaining.Explainer import ExplainerPlot
 from faxai.explaining.ExplainerConfiguration import ExplainerConfiguration
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class PDP(CacheExplainerData, ExplainerPlot):
+class M_PDP(CacheExplainerData, ExplainerPlot):
     def check_configuration(cls, configuration: ExplainerConfiguration, throw: bool = True) -> bool:
         """
         Check if the provided configuration is valid for this explanation technique.
@@ -46,25 +46,33 @@ class PDP(CacheExplainerData, ExplainerPlot):
         configuration: ExplainerConfiguration,
         context: ExplainerContext,
     ) -> HyperPlane:
-        logger.debug("PDP explanation generation")
+
+        logger.debug("M-PDP explanation generation")
 
         # Get ICE values
         # Ice holds the grid and the already predicted values
-        ice: HyperPlanes = context.explain("ice")
-        grid = ice.grid
+        mice: DataHolderCollection = context.explain("m-ice")
 
-        logger.debug(f"PDP grid shape: {grid.shape()}")
+        holder = DataHolderCollection()
 
-        # Get the predictions by averaging ICE values across all instances
-        ice_values = ice.targets
-        predictions = ice_values.mean(axis=0)
+        # For each Hyperplanes in mice, we need to average the targets
+        for locality in mice:
+            locality : HyperPlanes
 
-        # Reshape the predictions to match the grid shape
+            grid = locality.grid
+            targets = locality.targets
 
-        return HyperPlane(
-            grid=grid,
-            target=predictions,
-        )
+            # Create a hyperPlane for the PDP in this locality
+            predictions = targets.mean(axis=0)
+            holder.add(
+                HyperPlane(
+                    grid=grid,
+                    target=predictions,
+                )
+            )
+
+        return holder
+
 
     def plot(
         self,
@@ -72,7 +80,7 @@ class PDP(CacheExplainerData, ExplainerPlot):
         params: dict = None,
     ) -> DataPlotter:
         """
-        Plot the PDP values.
+        Plot the M-PDP values.
 
         Args:
             params (dict): Parameters for the plot.
@@ -82,13 +90,15 @@ class PDP(CacheExplainerData, ExplainerPlot):
         """
         params = dict(params) if params else {}
 
+        # TODO: mix grids to create a single line
+
         params.setdefault("color", "darkblue")
-        params.setdefault("label", "PDP")
+        params.setdefault("label", "m-PDP")
         params.setdefault("linewidth", 3)
 
-        hyperplane = self.explain(context)
+        collection = self.explain(context)
 
-        return from_hyperplane_to_line(
-            hyperplane=hyperplane,
+        return from_collection_to_lines(
+            collection=collection,
             params=params,
         )
