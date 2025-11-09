@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "faxai"
+name = "faex"
 version = "0.1.0"
 description = "Feature Attribution Model-Agnostic Python library for Machine Learning Explainability"
 readme = { file = "README.md", content-type = "text/markdown" }
@@ -19,7 +19,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-keywords = ["machine-learning", "explainability", "feature-attribution", "pdp", "local-pdp", "faxai"]
+keywords = ["machine-learning", "explainability", "feature-attribution", "pdp", "local-pdp", "faex"]
 requires-python = ">=3.9"
 dependencies = [
     "numpy>=2.0.0",
@@ -50,18 +50,18 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/jparisu/faxai"
-Documentation = "https://faxai.readthedocs.io/"
-Repository = "https://github.com/jparisu/faxai"
-Issues = "https://github.com/jparisu/faxai/issues"
-Changelog = "https://github.com/jparisu/faxai/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/jparisu/faex"
+Documentation = "https://faex.readthedocs.io/"
+Repository = "https://github.com/jparisu/faex"
+Issues = "https://github.com/jparisu/faex/issues"
+Changelog = "https://github.com/jparisu/faex/blob/main/CHANGELOG.md"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["faxai*"]
+include = ["faex*"]
 exclude = ["tests*"]
 
 [tool.pytest.ini_options]
@@ -76,7 +76,7 @@ addopts = [
 ]
 
 [tool.coverage.run]
-source = ["faxai"]
+source = ["faex"]
 branch = true
 
 [tool.coverage.report]
@@ -110,7 +110,7 @@ select = [
 "__init__.py" = ["F401"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["faxai"]
+known-first-party = ["faex"]
 
 [tool.mypy]
 python_version = "3.9"

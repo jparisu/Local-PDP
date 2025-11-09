@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from faxai.mathing.bandwidth import Bandwidth
+from faex.mathing.bandwidth import Bandwidth
 
 
 class Test_BandwidthCheckMatrix:

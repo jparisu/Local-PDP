@@ -1,14 +1,14 @@
-# Contributing to faxai
+# Contributing to faex
 
-Thank you for your interest in contributing to `faxai`! This document provides guidelines and instructions for contributing to this project.
+Thank you for your interest in contributing to `faex`! This document provides guidelines and instructions for contributing to this project.
 
 ## Getting Started
 
 1. Fork the repository on GitHub
 2. Clone your fork locally
    ```bash
-   git clone https://github.com/YOUR_USERNAME/faxai.git
-   cd faxai
+   git clone https://github.com/YOUR_USERNAME/faex.git
+   cd faex
    ```
 3. Create a new branch for your contribution
    ```bash
@@ -54,7 +54,7 @@ ruff format src/ tests/
 ruff check src/ tests/
 
 # Type check
-mypy src/faxai
+mypy src/faex
 
 # Run tests
 pytest tests/
@@ -72,7 +72,7 @@ All contributions should include tests:
    ```
 4. Check test coverage:
    ```bash
-   pytest tests/ --cov=faxai --cov-report=term
+   pytest tests/ --cov=faex --cov-report=term
    ```
 
 ### Documentation

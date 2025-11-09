@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
 
-from faxai.mathing.distribution.parametric_distributions import NormalDistribution, UniformDistribution
-from faxai.mathing.distribution.UnionDistribution import UnionDistribution
-from faxai.mathing.RandomGenerator import RandomGenerator
+from faex.mathing.distribution.parametric_distributions import NormalDistribution, UniformDistribution
+from faex.mathing.distribution.UnionDistribution import UnionDistribution
+from faex.mathing.RandomGenerator import RandomGenerator
 
 # --- Helpers -----------------------------------------------------------------
 
