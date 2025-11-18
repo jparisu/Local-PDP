@@ -3,13 +3,13 @@
 import numpy as np
 import pytest
 
-from faxai.mathing.distribution.kernel_distributions import (
+from faex.mathing.distribution.kernel_distributions import (
     KernelDensityDistribution,
     KernelDensityEstimationDistribution,
 )
-from faxai.mathing.kernel import GaussianKernel, UniformKernel
-from faxai.mathing.bandwidth import Bandwidth
-from faxai.mathing.RandomGenerator import RandomGenerator
+from faex.mathing.kernel import GaussianKernel, UniformKernel
+from faex.mathing.bandwidth import Bandwidth
+from faex.mathing.RandomGenerator import RandomGenerator
 
 
 # --- KernelDensityDistribution Tests ---

@@ -3,12 +3,12 @@
 import numpy as np
 import pytest
 
-from faxai.mathing.distribution.sampling_distributions import (
+from faex.mathing.distribution.sampling_distributions import (
     DeltaDistribution,
     HistogramDistribution,
     WeightedDistribution,
 )
-from faxai.mathing.RandomGenerator import RandomGenerator
+from faex.mathing.RandomGenerator import RandomGenerator
 
 
 # --- DeltaDistribution Tests ---
