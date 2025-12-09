@@ -2,89 +2,134 @@ import logging
 import sys
 from pathlib import Path
 
-logging.getLogger(__name__).addHandler(logging.NullHandler())
-
-
 # Add src directory to Python path
 src_path = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(src_path))
 
-# Activate debugging
 # Silence traces from other modules except my library
-logging.basicConfig(
-    level=logging.DEBUG,
-)
+logging.basicConfig(level=logging.WARNING)
+
+# Activate debugging
+logging.getLogger("faex").setLevel(logging.DEBUG)
 
 ########################################################################################################################
-
-import numpy as np
 import pandas as pd
+import numpy as np
 
-from faex.mathing.distribution.parametric_distributions import NormalDistribution, UniformDistribution
-from faex.mathing.distribution.UnionDistribution import UnionDistribution
-from faex.mathing.RandomGenerator import RandomGenerator
+TEST_SIZE = 0.2
+RANDOM_STATE = 42
+N_ESTIMATORS = 30
 
-# Set pandas print options for better readability, wider column and not breaking lines
-pd.set_option('display.precision', 2)
-pd.set_option('display.width', 100)
-pd.set_option('display.max_columns', None)
+# Download dataset
+url = "https://raw.githubusercontent.com/christophM/interpretable-ml-book/master/data/bike.csv"
+df = pd.read_csv(url)
 
-# Set numpy print options for better readability
-np.set_printoptions(precision=2, suppress=True)
-np.set_printoptions(threshold=sys.maxsize)
+# Preprocess data
+columns = ["temp", "hum", "windspeed", "mnth", "yr", "cnt"]
+df = df[columns]
 
-rng = RandomGenerator(42)
+# Preprocess mnth column
+mnth_map = { "JAN": 1, "FEB": 2, "MAR": 3, "APR": 4, "MAY": 5, "JUN": 6, "JUL": 7, "AUG": 8, "SEP": 9, "OCT": 10, "NOV": 11, "DEC": 12 }
+df["mnth"] = df["mnth"].map(mnth_map)
 
-N = 8
-df = pd.DataFrame({
-    "x1": np.linspace(0,10, N),
-    "x2": rng.gauss(0, 1, N),
-    "x3": np.linspace(0,10, N) + rng.gauss(0, 1, N),
-    "target": np.linspace(0, 1, N)
-})
-
-df_X, df_y = df[["x1", "x2", "x3"]], df["target"]
-
-print(f"Data: {df_X.head()}")
+# Show dataset
+df.head()
 
 
-class MockModel:
-    def predict(self, df: pd.DataFrame) -> np.ndarray:
-        return 2 * df["x1"] + df["x3"]
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
 
-model = MockModel()
+df_x = df.drop(columns=["cnt"])
+df_y = df["cnt"]
 
-print(f"Predictions: {model.predict(df_X.head())}")
+# Divide in train and test set
+X_train, X_test, y_train, y_test = train_test_split(
+    df_x,
+    df_y,
+    test_size=TEST_SIZE,
+    random_state=RANDOM_STATE
+)
+
+# Train model
+model = RandomForestRegressor(random_state=RANDOM_STATE, n_estimators=30)
+model.fit(X_train, y_train)
+
+# Evaluate model
+r2_train = model.score(X_train, y_train)
+r2_test = model.score(X_test, y_test)
+
+print(f"R2 on train set: {r2_train:.3f}")
+print(f"R2 on test set: {r2_test:.3f}")
 
 
-from faex.explaining.ExplainerCore import ExplainerCore
-from faex.explaining.DataCore import DataCore
-from faex.explaining.ExplainerConfiguration import ExplainerConfiguration
+from faex.core.DataCore import DataCore
+from faex.core.ExplanationCore import ExplanationCore
+
+FEATURE = "temp"
+
+# Generate DataCore
+datacore = DataCore(
+        df_X=df_x,
+        model=model,
+        study_features=[FEATURE],
+)
+
+# Generate explainer
+explainer = ExplanationCore(datacore=datacore)
+
+
+from faex.explaining.ExplainerFactory import GlobalExplainerFactory, ExplainerFactory
 from faex.explaining.explainers.ICE import ICE
+factory = GlobalExplainerFactory()
+print(factory)
+print(type(factory))
 
-core = ExplainerCore(
-    dataframe_X=df_X,
-    model=model
+# ExplainerFactory.register_explainer(
+#     explainer=ICE,
+#     aliases=["ice"],
+# )
+print(factory.get_available_explainers())
+
+
+# Explaining PDP
+explainer.visualize_doubleplot(
+    explanations=[
+        "real-prediction",
+        "histogram",
+        "distribution",
+        "ice",
+        "pdp",
+        "pdp-d",
+    ],
+    matplotlib=True,
 )
 
-conf1 = ExplainerConfiguration(
-    datacore=core.datacore(),
-    study_features=["x1", "x2"],
-    bins=10,
-    strict_limits=False,
+# Explaining l-PDP
+explainer.visualize_doubleplot(
+    explanations=[
+        "real-prediction",
+        "histogram",
+        "distribution",
+        "KernelNormalizer",
+        # "l-ice",
+        "l-pdp",
+        "l-pdp-d",
+    ],
+    matplotlib=True,
 )
 
+import plotly.graph_objects as go
 
-from faex.explaining.explainers.L_ICE import L_ICE
-from faex.explaining.ExplainerFactory import GlobalExplainerFactory
+USE_MATPLOTLIB = False
 
-
-
-
-print(f"CONFIGURATION: {conf1}")
-
-core.add_configuration("conf1", conf1)
-
-
-ice = core.explain(technique="ice", configuration="conf1")
-print(ice)
+# Explaining PDP
+explainer.visualize_doubleplot(
+    explanations=[
+        "real-prediction",
+        "histogram",
+        "distribution",
+        "ice",
+        "pdp",
+    ],
+    matplotlib=USE_MATPLOTLIB,
+)

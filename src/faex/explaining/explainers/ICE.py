@@ -9,12 +9,12 @@ import logging
 from typing import TYPE_CHECKING
 
 from faex.data.DataHolder import HyperPlanes
-from faex.data.DataPlotter import DataPlotter
+from faex.plotting.DataPlotter import DataPlotter
 from faex.data.holder_to_plotter import from_hyperplanes_to_lines, from_hyperplanes_to_scatter
-from faex.explaining.DataCore import DataCore
 from faex.explaining.Explainer import ExplainerPlot
-from faex.explaining.ExplainerConfiguration import ExplainerConfiguration
+from faex.core.DataCore import DataCore
 from faex.explaining.explainers.CacheExplainer import CacheExplainerData
+from faex.explaining.ExplainerFactory import ExplainerFactory
 
 # Avoid circular imports with TYPE_CHECKING
 if TYPE_CHECKING:
@@ -24,7 +24,8 @@ logger = logging.getLogger(__name__)
 
 
 class ICE(CacheExplainerData, ExplainerPlot):
-    def check_configuration(cls, configuration: ExplainerConfiguration, throw: bool = True) -> bool:
+
+    def check_configuration(cls, configuration: DataCore, throw: bool = True) -> bool:
         """
         Check if the provided configuration is valid for this explanation technique.
 
@@ -42,11 +43,11 @@ class ICE(CacheExplainerData, ExplainerPlot):
 
     def _explain(
         self,
-        datacore: DataCore,
-        configuration: ExplainerConfiguration,
         context: ExplainerContext,
     ) -> HyperPlanes:
         logger.debug("ICE explanation generation")
+
+        configuration = context.get_configuration()
 
         # Get the grid dataframe from configuration
         grid = configuration.get_grid()
@@ -59,10 +60,10 @@ class ICE(CacheExplainerData, ExplainerPlot):
         logger.debug(f"ICE grid to predict dataframe size: {to_predict.shape}")
 
         # Get the predictions for every point in the grid
-        predictions = configuration.datacore.predict(to_predict)
+        predictions = configuration.predict(to_predict)
 
         # Reshape the predictions to match the grid shape
-        n = len(configuration.datacore)
+        n = len(configuration.df_X)
         new_shape = grid.shape() + (n,)
         reshaped_predictions = predictions.reshape(new_shape)
 
@@ -70,6 +71,7 @@ class ICE(CacheExplainerData, ExplainerPlot):
         reshaped_predictions = reshaped_predictions.transpose(-1, *range(len(grid.shape())))
 
         return HyperPlanes(grid=grid, targets=reshaped_predictions)
+
 
     def plot(self, context: ExplainerContext, params: dict = None) -> DataPlotter:
         """
@@ -86,14 +88,21 @@ class ICE(CacheExplainerData, ExplainerPlot):
         params.setdefault("color", "paleturquoise")
         params.setdefault("label", "ICE")
         params.setdefault("linewidth", 1)
-        params.setdefault("alpha", 0.2)
+        params.setdefault("opacity", 0.1)
 
-        hyperplane = self.explain(context)
+        hyperplane = context.explain("ice")
 
         return from_hyperplanes_to_lines(
             hyperplanes=hyperplane,
             params=params,
         )
+
+
+# Register Explainer
+ExplainerFactory.register_explainer(
+    explainer=ICE,
+    aliases=["ice"],
+)
 
 
 class ICE_Scatter(ExplainerPlot):
@@ -111,8 +120,8 @@ class ICE_Scatter(ExplainerPlot):
 
         params.setdefault("color", "teal")
         params.setdefault("label", "ICE Scatter")
-        params.setdefault("s", 10)
-        params.setdefault("alpha", 0.5)
+        params.setdefault("size", 10)
+        params.setdefault("opacity", 0.5)
 
         hyperplane = context.explain("ice")
 
@@ -120,3 +129,10 @@ class ICE_Scatter(ExplainerPlot):
             hyperplanes=hyperplane,
             params=params,
         )
+
+
+# Register Explainer
+ExplainerFactory.register_explainer(
+    explainer=ICE_Scatter,
+    aliases=["ice-scatter"]
+)

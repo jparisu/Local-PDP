@@ -232,17 +232,18 @@ class Bandwidth:
             sqrt_h = samples ** (-1 / (dimension + 4)) * sigma[i]
             matrix[i, i] = sqrt_h**2
 
-        logger.debug(f"Silverman bandwidth matrix computed from {samples} {sigma}: \n{matrix}")
+        logger.debug(f"Silverman bandwidth matrix computed from {samples} samples with std {sigma}: \n{matrix}")
 
         return Bandwidth(matrix)
 
     @staticmethod
-    def reckon_silverman_bandwidth_from_data(df: pd.DataFrame) -> Bandwidth:
+    def reckon_silverman_bandwidth_from_data(df: pd.DataFrame, factor: float = 1.0) -> Bandwidth:
         """
         Compute the Silverman bandwidth from a pandas DataFrame.
 
         Args:
             df (pd.DataFrame): The data as a pandas DataFrame.
+            factor (float): Scaling factor to apply to the Silverman bandwidth.
 
         Returns:
             Bandwidth: The Silverman bandwidth matrix computed from the data.
@@ -251,7 +252,7 @@ class Bandwidth:
         n = df.shape[0]
         sigma = df.std().to_numpy()
 
-        return Bandwidth.reckon_silverman_bandwidth(n, sigma)
+        return Bandwidth.reckon_silverman_bandwidth(n, sigma).scale(factor)
 
     ###########################
     # Numpy matrix methods
@@ -293,6 +294,26 @@ class Bandwidth:
 
     ################################
     # Special bandwidth matrices construction
+
+    def scale(self, factor: float) -> Bandwidth:
+        """
+        Scale the bandwidth matrix by a given factor.
+
+        Args:
+            factor (float): The scaling factor.
+
+        Returns:
+            Bandwidth: A new bandwidth matrix scaled by the given factor.
+        """
+
+        if factor is None:
+            return self
+
+        elif factor <= 0:
+            raise ValueError("Scaling factor must be positive.")
+
+        matrix = self._matrix * factor
+        return Bandwidth(matrix)
 
     @staticmethod
     def build_identity(dimension: int) -> Bandwidth:

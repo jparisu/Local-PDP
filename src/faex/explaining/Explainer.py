@@ -9,9 +9,8 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any
 
 from faex.data.DataHolder import DataHolder
-from faex.data.DataPlotter import DataPlotter
-from faex.explaining.ExplainerConfiguration import ExplainerConfiguration
-
+from faex.plotting.DataPlotter import DataPlotter
+from faex.core.DataCore import DataCore
 # Avoid circular imports with TYPE_CHECKING
 if TYPE_CHECKING:
     from faex.explaining.ExplainerContext import ExplainerContext
@@ -29,16 +28,16 @@ class Explainer(ABC):
     # Static Methods
 
     @classmethod
-    def check_configuration(cls, configuration: ExplainerConfiguration, throw: bool = True) -> bool:
+    def check_configuration(cls, configuration: DataCore, throw: bool = True) -> bool:
         """
         Check if the provided configuration is valid for this explanation technique.
 
         By default, check datacore presence.
         Args:
-            configuration (ExplainerConfiguration): The configuration to check.
+            configuration (DataCore): The configuration to check.
 
         Returns:
-            List[ExplainerConfiguration]: A list of valid configurations.
+            List[DataCore]: A list of valid configurations.
         """
         return configuration.check(throw=throw)
 
@@ -50,7 +49,7 @@ class Explainer(ABC):
         Returns:
             str: The name of the explanation technique.
         """
-        return cls.__name__.lower()
+        return cls.__name__
 
 
 class ExplainerData(Explainer):

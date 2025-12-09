@@ -8,10 +8,9 @@ import logging
 from typing import Any, TypeVar
 
 from faex.data.DataHolder import DataHolder
-from faex.data.DataPlotter import DataPlotter
-from faex.explaining.DataCore import DataCore
+from faex.plotting.DataPlotter import DataPlotter
 from faex.explaining.Explainer import Explainer, ExplainerData, ExplainerPlot
-from faex.explaining.ExplainerConfiguration import ExplainerConfiguration
+from faex.core.DataCore import DataCore
 from faex.explaining.ExplainerFactory import ExplainerFactory, GlobalExplainerFactory
 
 logger = logging.getLogger(__name__)
@@ -24,27 +23,24 @@ class ExplainerContext:
     Helper function to cache multiple explainers and their configurations.
 
     Attributes:
-        datacore (DataCore): The data core containing the data to be explained.
-        configuration (ExplainerConfiguration): The configuration for the explainers.
+        configuration (DataCore): The configuration for the explainers.
         explainers (dict[str, Explainer]): A dictionary of cached explainers.
         factory (ExplainerFactory): The factory to create explainers.
     """
 
     def __init__(
         self,
-        datacore: DataCore,
-        configuration: ExplainerConfiguration,
-        explainers: dict[str, Explainer] | None = None,
+        configuration: DataCore,
+        explainers: list[Explainer] | None = None,
         factory: ExplainerFactory | None = None,
     ):
-        self.datacore = datacore
         self.configuration = configuration
         self.explainers = explainers if explainers is not None else {}
         self.factory = factory if factory is not None else GlobalExplainerFactory()
 
         # Apply name convention to existing explainers
         self.explainers = {
-            ExplainerFactory.name_convention(name): explainer for name, explainer in self.explainers.items()
+            self.factory.name_convention(explainer.name()): explainer for explainer in self.explainers
         }
 
     def __get_explainer_or_create(self, technique: str, forced_type: type[T]) -> T:
@@ -58,12 +54,11 @@ class ExplainerContext:
         Returns:
             Explainer: The requested explainer instance.
         """
-        technique = ExplainerFactory.name_convention(technique)
+        technique = self.factory.name_convention(technique)
 
         if technique not in self.explainers:
             # Try to create the explainer from the factory
             explainer = self.factory.create_explainer(technique)
-
             self.explainers[technique] = explainer
 
         explainer = self.explainers[technique]
@@ -103,3 +98,12 @@ class ExplainerContext:
         explainer = self.__get_explainer_or_create(technique, forced_type=ExplainerPlot)
         explainer.check_configuration(self.configuration, throw=True)
         return explainer.plot(context=self, **kwargs)
+
+    def get_configuration(self) -> DataCore:
+        """
+        Get the current configuration.
+
+        Returns:
+            DataCore: The current configuration.
+        """
+        return self.configuration

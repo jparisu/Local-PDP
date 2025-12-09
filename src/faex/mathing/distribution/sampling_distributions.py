@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
+from scipy import stats
 
 from faex.mathing.distribution.Distribution import Distribution
 from faex.mathing.RandomGenerator import RandomGenerator
@@ -104,6 +105,127 @@ class DeltaDistribution(Distribution):
         # Sample indices based on probabilities
         indices = [rng.choice(range(len(self._samples))) for _ in range(n)]
         return self._samples[indices]
+
+
+class DeltaWeightedDistribution(Distribution):
+    """
+    Represents a degenerate distribution concentrated only on those points that are given as samples,
+    where each sample can have a different weight.
+
+    This distribution assigns equal probability to each distinct sample value, with zero probability
+    elsewhere. It is effectively a discrete uniform distribution over the provided sample points.
+
+    Parameters
+    ----------
+    samples : np.ndarray
+        Array of sample points where the distribution has non-zero probability.
+
+    Notes
+    -----
+    - The mean is the average of all samples (with repetitions counted).
+    - The mode is the most frequently occurring value.
+    - The median is computed from the sorted samples.
+    - PDF returns probability mass at exact sample points, zero elsewhere.
+    - CDF is a step function.
+    """
+
+    def __init__(
+            self,
+            samples: np.ndarray,
+            weights: np.ndarray,
+            max_weight: float | None = None):
+        if len(samples) == 0:
+            raise ValueError("Samples array cannot be empty.")
+
+        self._samples = np.asarray(samples, dtype=float)
+        self._weights = np.asarray(weights, dtype=float)
+        self._max_weight = max_weight if max_weight is not None else np.max(self._weights)
+
+        # Store unique values
+        self._unique_values = np.unique(self._samples)
+        self._unique_values.sort()
+
+        # Store the accumulated weight
+        self._total_weight = np.sum(self._weights)
+
+        # Calculate the probabilities for each unique value
+        self._probabilities = np.zeros_like(self._unique_values, dtype=float)
+        for i, val in enumerate(self._unique_values):
+            mask = np.isclose(self._samples, val, rtol=1e-15, atol=1e-15)
+            self._probabilities[i] = np.sum(self._weights[mask]) / self._total_weight
+
+
+    def mean(self) -> float:
+        """Calculate the weighted mean of the distribution."""
+        return float(np.sum(self._samples * self._weights) / self._total_weight)
+
+    def std(self, ddof: int = 0) -> float:
+        """Calculate the standard deviation of the distribution."""
+        return float(np.sqrt(np.sum(self._weights * (self._samples - self.mean()) ** 2) / self._total_weight))
+
+    def moded(self) -> float:
+        """Calculate the mode of the distribution (most frequent value)."""
+        max_prob_idx = np.argmax(self._probabilities)
+        return float(self._unique_values[max_prob_idx])
+
+    def median(self) -> float:
+        """Calculate the median of the distribution."""
+        # Probabilities are sorted, so sum and accumulate until reaching 0.5 of total weight
+        cumulative_prob = 0.0
+        for val, prob in zip(self._unique_values, self._probabilities):
+            cumulative_prob += prob
+            if cumulative_prob >= 0.5:
+                return float(val)
+
+    @cache_method
+    def pdf(self, x: np.ndarray) -> np.ndarray:
+        """
+        Calculate the probability mass function.
+
+        Returns the probability mass at points that match samples, zero elsewhere.
+        """
+        # TODO
+        raise NotImplementedError("Method not implemented.")
+
+    @cache_method
+    def cdf(self, x: np.ndarray) -> np.ndarray:
+        """
+        Calculate the cumulative distribution function.
+
+        Returns the probability that a random sample is less than or equal to x.
+        """
+        # TODO
+        raise NotImplementedError("Method not implemented.")
+
+    @cache_method
+    def maximum_pdf(self) -> float:
+        """Calculate the maximum value of the PDF (highest probability mass)."""
+        return float(np.max(self._probabilities))
+
+    def random_sample(self, n: int = 1, rng: RandomGenerator | None = None) -> np.ndarray:
+        """
+        Generate random samples from the distribution.
+
+        Samples are drawn from the original sample set with replacement.
+        """
+        # TODO
+        raise NotImplementedError("Method not implemented.")
+
+
+    def mean_confidence_interval(self, confidence_level: float = 0.95) -> float:
+        """
+        Calculate the confidence interval for the given confidence level.
+        """
+        # Calculate the effective number of samples given by the max weight
+        effective_n = self._total_weight / self._max_weight
+
+        if effective_n <= 1:
+            return (-np.inf, np.inf)
+
+        mean = self.mean()
+        std_err = self.std(ddof=1) / np.sqrt(effective_n)
+        h = std_err * stats.t.ppf((1 + confidence_level) / 2, effective_n - 1)
+        return h
 
 
 class HistogramDistribution(Distribution):

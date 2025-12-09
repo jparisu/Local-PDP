@@ -48,6 +48,10 @@ docs = [
     "mkdocstrings[python]>=0.24.0",
     "mkdocs-include-markdown-plugin>=6.0.0",
 ]
+app = [
+    "streamlit>=1.0.0",
+    "seaborn>=0.12.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/jparisu/faex"

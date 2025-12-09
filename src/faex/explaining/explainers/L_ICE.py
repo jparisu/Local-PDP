@@ -9,12 +9,13 @@ import logging
 from typing import TYPE_CHECKING
 
 from faex.data.DataHolder import HyperPlanes, WeightedHyperPlanes
-from faex.data.DataPlotter import DataPlotter
-from faex.data.holder_to_plotter import from_hyperplanes_to_lines
-from faex.explaining.DataCore import DataCore
+from faex.plotting.DataPlotter import DataPlotter
+from faex.data.holder_to_plotter import from_weighted_hyperplanes_to_lines
+from faex.core.DataCore import DataCore
 from faex.explaining.Explainer import ExplainerPlot
-from faex.explaining.ExplainerConfiguration import ExplainerConfiguration
+from faex.core.DataCore import DataCore
 from faex.explaining.explainers.CacheExplainer import CacheExplainerData
+from faex.explaining.ExplainerFactory import ExplainerFactory
 
 # Avoid circular imports with TYPE_CHECKING
 if TYPE_CHECKING:
@@ -24,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 class L_ICE(CacheExplainerData, ExplainerPlot):
-    def check_configuration(cls, configuration: ExplainerConfiguration, throw: bool = True) -> bool:
+    def check_configuration(cls, configuration: DataCore, throw: bool = True) -> bool:
         valid = True
 
         # Check the datacore, features and feature values
@@ -37,8 +38,6 @@ class L_ICE(CacheExplainerData, ExplainerPlot):
 
     def _explain(
         self,
-        datacore: DataCore,
-        configuration: ExplainerConfiguration,
         context: ExplainerContext,
     ) -> WeightedHyperPlanes:
         logger.debug("l-ICE explanation generation")
@@ -68,14 +67,20 @@ class L_ICE(CacheExplainerData, ExplainerPlot):
         """
         params = dict(params) if params else {}
 
-        params.setdefault("color", "paleturquoise")
+        params.setdefault("color", "lime")
         params.setdefault("label", "l-ICE")
         params.setdefault("linewidth", 1)
-        params.setdefault("alpha", 0.2)
+        params.setdefault("opacity", 0.2)
 
         hyperplane = self.explain(context)
 
-        return from_hyperplanes_to_lines(
-            hyperplanes=hyperplane,
+        return from_weighted_hyperplanes_to_lines(
+            w_hyperplanes=hyperplane,
             params=params,
         )
+
+# Register Explainer
+ExplainerFactory.register_explainer(
+    explainer=L_ICE,
+    aliases=["l-ice", "local-ice"],
+)

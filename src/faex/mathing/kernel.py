@@ -318,15 +318,17 @@ class InfiniteKernel(UniformKernel):
         super().__init__(bandwidth=Bandwidth.build_infinite(dimension))
 
 
-def create_default_kernel(df: pd.DataFrame) -> Kernel:
+def create_default_kernel(df: pd.DataFrame, factor: float = None) -> Kernel:
     """
     Create a default Gaussian kernel using Silverman's rule of thumb for bandwidth selection.
 
     Args:
         df (pd.DataFrame): The data used to compute the optimal bandwidth.
+        factor (float): Scaling factor to apply to the Silverman bandwidth.
 
     Returns:
         Kernel: A GaussianKernel instance with bandwidth computed using Silverman's rule.
     """
-    bandwidth = Bandwidth.reckon_silverman_bandwidth_from_data(df)
+    bandwidth = Bandwidth.reckon_silverman_bandwidth_from_data(df, factor)
+
     return GaussianKernel(bandwidth)

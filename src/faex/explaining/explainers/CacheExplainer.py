@@ -9,9 +9,8 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING, Any
 
 from faex.data.DataHolder import DataHolder
-from faex.explaining.DataCore import DataCore
 from faex.explaining.Explainer import ExplainerData
-from faex.explaining.ExplainerConfiguration import ExplainerConfiguration
+from faex.core.DataCore import DataCore
 from faex.utils.decorators import cache_method
 
 # Avoid circular imports with TYPE_CHECKING
@@ -33,16 +32,13 @@ class CacheExplainerData(ExplainerData):
         It also simplifies the interface by using ExplainerContext.
         """
         return self._explain(
-            datacore=context.datacore,
-            configuration=context.configuration,
             context=context,
+            **kwargs
         )
 
     @abstractmethod
     def _explain(
         self,
-        datacore: DataCore,
-        configuration: ExplainerConfiguration,
         context: ExplainerContext,
     ) -> DataHolder:
         """

@@ -10,9 +10,12 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from faex.data.DataHolder import HyperPlane, HyperPlanes
-from faex.explaining.DataCore import DataCore
-from faex.explaining.ExplainerConfiguration import ExplainerConfiguration
+from faex.core.DataCore import DataCore
 from faex.explaining.explainers.CacheExplainer import CacheExplainerData
+from faex.explaining.ExplainerFactory import ExplainerFactory
+from faex.explaining.Explainer import ExplainerPlot
+from faex.data.holder_to_plotter import from_hyperplane_to_area_line
+from faex.plotting.DataPlotter import DataPlotter
 
 # Avoid circular imports with TYPE_CHECKING
 if TYPE_CHECKING:
@@ -26,7 +29,7 @@ class KernelValues(CacheExplainerData):
     Represent the kernel weight for each of the ICE points.
     """
 
-    def check_configuration(cls, configuration: ExplainerConfiguration, throw: bool = True) -> bool:
+    def check_configuration(cls, configuration: DataCore, throw: bool = True) -> bool:
         valid = True
 
         # Check the datacore, features and feature values
@@ -43,18 +46,18 @@ class KernelValues(CacheExplainerData):
 
     def _explain(
         self,
-        datacore: DataCore,
-        configuration: ExplainerConfiguration,
         context: ExplainerContext,
     ) -> HyperPlanes:
         logger.debug("Calculating kernel values")
 
+        configuration = context.configuration
+
         kernel = configuration.kernel
         feature_values = configuration.feature_values
-        df = datacore.df_X
+        df = configuration.df_X
         features = configuration.study_features
         n = len(df)
-        instance_values = datacore.df_X[features].to_numpy()
+        instance_values = configuration.df_X[features].to_numpy()
 
         # Get ICE values
         ice: HyperPlanes = context.explain("ice")
@@ -71,11 +74,11 @@ class KernelValues(CacheExplainerData):
             # Get the current feature values from the indexer
             current_values = np.array([feature_values[features[i]][indexer[i]] for i in range(len(features))])
 
-            logger.debug(f"Calculating kernel values for indexes {indexer}  with grid point: {current_values}")
-            logger.debug(
-                f"Instance: {instance_values[0].shape}, Current Values: {current_values.shape}, Index: {(0,) + tuple(indexer)}"
-            )
-            logger.debug(f"Instance: {instance_values[0]}, Current Values: {current_values}")
+            # logger.debug(f"Calculating kernel values for indexes {indexer}  with grid point: {current_values}")
+            # logger.debug(
+            #     f"Instance: {instance_values[0].shape}, Current Values: {current_values.shape}, Index: {(0,) + tuple(indexer)}"
+            # )
+            # logger.debug(f"Instance: {instance_values[0]}, Current Values: {current_values}")
 
             # Calculate the kernel values for every point in the data
             for i, instance in enumerate(instance_values):
@@ -98,13 +101,19 @@ class KernelValues(CacheExplainerData):
 
         return HyperPlanes(grid=ice.grid, targets=k_values)
 
+# Register Explainer
+ExplainerFactory.register_explainer(
+    explainer=KernelValues,
+    aliases=["kernel-values", "kernel_weights"],
+)
 
-class KernelNormalizer(CacheExplainerData):
+
+class KernelNormalizer(CacheExplainerData, ExplainerPlot):
     """
     Represent the sum of the kernel weights for each point in the grid
     """
 
-    def check_configuration(cls, configuration: ExplainerConfiguration, throw: bool = True) -> bool:
+    def check_configuration(cls, configuration: DataCore, throw: bool = True) -> bool:
         valid = True
 
         # Check the datacore, features and feature values
@@ -115,14 +124,8 @@ class KernelNormalizer(CacheExplainerData):
 
         return valid
 
-    @classmethod
-    def name(cls) -> str:
-        return "kernel-normalizer"
-
     def _explain(
         self,
-        datacore: DataCore,
-        configuration: ExplainerConfiguration,
         context: ExplainerContext,
     ) -> HyperPlane:
         logger.debug("Calculating kernel normalizer")
@@ -140,3 +143,38 @@ class KernelNormalizer(CacheExplainerData):
             grid=grid,
             target=normalizer,
         )
+
+    def plot(self, context: ExplainerContext, params: dict = None) -> DataPlotter:
+        """
+        Plot the ICE scatter values.
+
+        Args:
+            params (dict): Parameters for the plot.
+
+        Returns:
+            DataPlotter: The plotter object.
+        """
+
+        logger.debug("Plotting kernel normalizer")
+
+        params = dict(params) if params else {}
+
+        params.setdefault("color", "black")
+        params.setdefault("label", "normalization")
+        params.setdefault("opacity", 1.0)
+
+        hyperplane = context.explain(self.name())
+
+        # Modify Hyperplane so max value is 1
+        hyperplane = hyperplane.narrow()
+
+        return from_hyperplane_to_area_line(
+            hyperplane=hyperplane,
+            params=params,
+        )
+
+# Register Explainer
+ExplainerFactory.register_explainer(
+    explainer=KernelNormalizer,
+    aliases=["kernel-normalizer", "normalization", "reliability"],
+)

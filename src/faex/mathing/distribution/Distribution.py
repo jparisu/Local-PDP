@@ -91,3 +91,13 @@ class Distribution(ABC):
         Generate random samples from the distribution.
         """
         pass
+
+    ############################
+    # Confidence Interval
+
+    # @abstractmethod TODO implement for all subclasses
+    def mean_confidence_interval(self, confidence_level: float = 0.95) -> float:
+        """
+        Calculate the confidence interval for the given confidence level as distance from current mean.
+        """
+        raise NotImplementedError("mean_confidence_interval not implemented for this distribution.")

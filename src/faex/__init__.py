@@ -7,13 +7,5 @@ A Python library for feature attribution model agnostic explainability methods i
 __version__ = "0.1.0"
 __author__ = "jparisu"
 
-import logging
-
-from . import mathing, utils
-
-logging.getLogger(__name__).addHandler(logging.NullHandler())
-
-__all__ = [
-    "mathing",
-    "utils",
-]
+# This is required for registering all explanation techniques
+from faex.explaining import explainers  # noqa: F401

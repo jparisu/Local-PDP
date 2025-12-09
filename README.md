@@ -13,3 +13,12 @@ This repository implements `faex` python library with several feature attributio
 Mainly, it focuses on **Local-PDP** (Local Partial Dependence Plots) method, which is designed to provide reliable explanations in any dataset, removing PDP independence assumptions.
 
 📘 **Documentation:** [https://faex.readthedocs.io](https://faex.readthedocs.io)
+
+
+## Installation
+
+You can install `faex` via `pip` from github repository:
+
+```bash
+pip install git+https://github.com/jparisu/faex.git
+```
